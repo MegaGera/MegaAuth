@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  megaauth:
+    image: 'megaauth'
+    container_name: megaauth
+    build: .
+    ports:
+      - "80"
+    volumes:
+      - ./db:/app/db
+    networks:
+      - megagera_network
+
+networks:
+  megagera_network:
+    external: true
+

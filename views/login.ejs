@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MegaAuth Login</title>
+</head>
+<body>
+
+  <div class="container">
+    <div class="form-container">
+      <h2>Login</h2>
+      <form id="login-form">
+        <label for="login-username">Username</label>
+        <input type="text" id="login-username" name="username" required>
+        <br>
+        <label for="login-password">Password:</label>
+        <input type="password" id="login-password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+        <span id="login-span">&nbsp;</span>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const $ = el => document.querySelector(el);
+
+    const loginForm = $('#login-form');
+    const loginSpan = $('#login-span');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectParam = urlParams.get('redirect');
+
+    loginForm?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const username = $('#login-username').value;
+      const password = $('#login-password').value;
+
+      fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+      }).then(res => {
+        if (res.ok) {
+          loginSpan.innerText = 'Login successful';
+          loginSpan.style.color = 'green';
+          setTimeout(() => {
+            if (redirectParam) {
+              window.location.href = redirectParam;
+            } else {
+              window.location.href = '/';
+            }
+          }, 2000);
+        } else {
+          loginSpan.innerText = 'Login failed';
+          loginSpan.style.color = 'red';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MegaAuth Admin</title>
+</head>
+<body>
+
+  <div class="container">
+    <div class="form-container">
+      <h2>Hola <%= data.username %></h2>
+      <p>Estás en el panel de administración</p>
+      <button id="close-session">Cerrar Sesión</button>
+      <% if (data.permissions.some(p => p.type === 'admin')) { %>
+        <br>
+        <h2>Register</h2>
+        <form id="register-form">
+          <label for="register-username">Username</label>
+          <input type="text" id="register-username" name="username" required>
+          <br>
+          <label for="register-password">Password:</label>
+          <input type="password" id="register-password" name="password" required>
+          <br>
+          <label for="register-confirm-password">Confirm Password:</label>
+          <input type="password" id="register-confirm-password" name="confirm-password" required>
+          <br>
+          <button type="submit">Register</button>
+          <span id="register-span">&nbsp;</span>
+        </form>
+      <% } %>
+    </div>
+
+  </div>
+
+  <% if (data.permissions.some(p => p.type === 'admin')) { %>
+    <div class="container">
+      <h2>Users</h2>
+      <table>
+        <tr>
+          <th>Username</th>
+          <th>MegaGoal</th>
+          <th>MegaDocu</th>
+          <th>Admin</th>
+          <th>Actions</th>
+        </tr>
+        <% users.forEach(user => { %>
+          <tr>
+            <td><%= user.username %></td>
+            <td>
+              <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megagoal" <%= user.permissions && user.permissions.some(p => p.name === 'megagoal') ? 'checked' : '' %>>
+            </td>
+            <td>
+              <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megadocu" <%= user.permissions && user.permissions.some(p => p.name === 'megadocu') ? 'checked' : '' %>>
+            </td>
+            <td>
+              <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="admin" <%= user.permissions && user.permissions.some(p => p.type === 'admin') ? 'checked' : '' %>>
+            </td>
+            <td>
+              <button class="delete-button" data-userid="<%= user.username %>">Delete</button>
+            </td>
+          </tr>
+        <% }); %>
+      </table>
+    </div>
+  <% } %>
+
+  <script>
+    const $ = el => document.querySelector(el);
+
+    const registerForm = $('#register-form');
+    const registerSpan = $('#register-span');
+
+    const logoutButton = $('#close-session');
+
+    registerForm?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const username = $('#register-username').value;
+      const password = $('#register-password').value;
+      const confirmPassword = $('#register-confirm-password').value;
+
+      if (password !== confirmPassword) {
+        registerSpan.innerText = 'Passwords do not match';
+        registerSpan.style.color = 'red';
+        return;
+      }
+
+      fetch('/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+      }).then(res => {
+        if (res.ok) {
+          registerSpan.innerText = 'Register successful';
+          registerSpan.style.color = 'green';
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
+        } else {
+          registerSpan.innerText = 'Register failed';
+          registerSpan.style.color = 'red';
+        }
+      });
+    });
+
+    logoutButton?.addEventListener('click', async e => {
+      e.preventDefault();
+      fetch('/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => {
+        if (res.ok) {
+          console.log(res)
+          window.location.href = '/';
+        }
+      });
+    });
+
+    const deleteUserButtons = document.querySelectorAll('.delete-button');
+    deleteUserButtons.forEach(button => {
+      button.addEventListener('click', async e => {
+        e.preventDefault();
+        const username = e.target.getAttribute('data-userid');
+        console.log(username)
+        fetch('/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username })
+        }).then(res => {
+          if (res.ok) {
+            window.location.href = '/';
+          }
+        });
+      });
+    });
+
+    const checkboxesPermissions = document.querySelectorAll('.checkbox-permissions');
+    checkboxesPermissions.forEach(checkbox => {
+      checkbox.addEventListener('change', async e => {
+        const username = e.target.getAttribute('data-userid');
+        const permissions = e.target.getAttribute('data-permissions');
+        const action = e.target.checked;
+        fetch('/permissions', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, 
+            permissions,
+            action })
+        }).then(res => {
+          if (res.ok) {
+            window.location.href = '/';
+          }
+        });
+      });
+    });
+
+  </script>
+</body>
+</html>
