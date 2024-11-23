@@ -1,67 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MegaAuth Admin</title>
+  <link rel="stylesheet" href="styles/admin.css">
 </head>
 <body>
 
   <div class="container">
     <div class="form-container">
-      <h2>Hola <%= data.username %></h2>
-      <p>Estás en el panel de administración</p>
-      <button id="close-session">Cerrar Sesión</button>
+      <div class="greetings">
+        <h2>Hola <%= data.username %></h2>
+      </div>
+      <button id="close-session" class="logout-button">Cerrar Sesión</button>
       <% if (data.permissions.some(p => p.type === 'admin')) { %>
-        <br>
-        <h2>Register</h2>
-        <form id="register-form">
-          <label for="register-username">Username</label>
-          <input type="text" id="register-username" name="username" required>
-          <br>
-          <label for="register-password">Password:</label>
-          <input type="password" id="register-password" name="password" required>
-          <br>
-          <label for="register-confirm-password">Confirm Password:</label>
-          <input type="password" id="register-confirm-password" name="confirm-password" required>
-          <br>
-          <button type="submit">Register</button>
-          <span id="register-span">&nbsp;</span>
-        </form>
+        <div class="admin-section">
+          <h2>Register</h2>
+          <form id="register-form">
+            <label for="register-username">Username</label>
+            <input type="text" id="register-username" name="username" required>
+            <label for="register-password">Password:</label>
+            <input type="password" id="register-password" name="password" required>
+            <label for="register-confirm-password">Confirm Password:</label>
+            <input type="password" id="register-confirm-password" name="confirm-password" required>
+            <button type="submit" class="form-button">Register</button>
+            <span id="register-span">&nbsp;</span>
+          </form>
+        </div>
+
+        <div class="admin-section">
+          <h2>Users</h2>
+          <table class="admin-table">
+            <tr>
+              <th>Username</th>
+              <th>MegaGoal</th>
+              <th>MegaDocu</th>
+              <th>Admin</th>
+              <th>Actions</th>
+            </tr>
+            <% users.forEach(user => { %>
+              <tr>
+                <td><%= user.username %></td>
+                <td>
+                  <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megagoal" <%= user.permissions && user.permissions.some(p => p.name === 'megagoal') ? 'checked' : '' %>>
+                </td>
+                <td>
+                  <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megadocu" <%= user.permissions && user.permissions.some(p => p.name === 'megadocu') ? 'checked' : '' %>>
+                </td>
+                <td>
+                  <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="admin" <%= user.permissions && user.permissions.some(p => p.type === 'admin') ? 'checked' : '' %>>
+                </td>
+                <td>
+                  <button class="delete-button" data-userid="<%= user.username %>">Delete</button>
+                </td>
+              </tr>
+            <% }); %>
+          </table>
+        </div>
       <% } %>
     </div>
-
   </div>
-
-  <% if (data.permissions.some(p => p.type === 'admin')) { %>
-    <div class="container">
-      <h2>Users</h2>
-      <table>
-        <tr>
-          <th>Username</th>
-          <th>MegaGoal</th>
-          <th>MegaDocu</th>
-          <th>Admin</th>
-          <th>Actions</th>
-        </tr>
-        <% users.forEach(user => { %>
-          <tr>
-            <td><%= user.username %></td>
-            <td>
-              <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megagoal" <%= user.permissions && user.permissions.some(p => p.name === 'megagoal') ? 'checked' : '' %>>
-            </td>
-            <td>
-              <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megadocu" <%= user.permissions && user.permissions.some(p => p.name === 'megadocu') ? 'checked' : '' %>>
-            </td>
-            <td>
-              <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="admin" <%= user.permissions && user.permissions.some(p => p.type === 'admin') ? 'checked' : '' %>>
-            </td>
-            <td>
-              <button class="delete-button" data-userid="<%= user.username %>">Delete</button>
-            </td>
-          </tr>
-        <% }); %>
-      </table>
-    </div>
-  <% } %>
 
   <script>
     const $ = el => document.querySelector(el);

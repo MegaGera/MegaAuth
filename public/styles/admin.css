@@ -1,0 +1,141 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Main layout */
+body {
+  background-color: #f0f0f0; /* Slightly gray background */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align admin panel near the top */
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Container styling */
+.container {
+  width: 100%;
+  max-width: 900px;
+  background-color: #ffe5e5; /* Slightly red */
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 30px;
+}
+
+.greetings {
+  margin-bottom: 20px;
+}
+
+/* Form container */
+.form-container {
+  text-align: center;
+}
+
+/* Logout button styling */
+.logout-button {
+  background-color: #d9534f; /* Red */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #c9302c;
+}
+
+/* Form styling */
+form {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+label {
+  margin: 5px auto;
+  color: #555;
+  align-self: flex-start;
+}
+
+input {
+  padding: 10px;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #d9534f;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.form-button:hover {
+  background-color: #c9302c;
+}
+
+#register-span {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Admin sections */
+.admin-section {
+  margin-top: 30px;
+}
+
+.admin-section h2 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Table styling */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.admin-table th,
+.admin-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.admin-table th {
+  background-color: #f8d7da; /* Light red header */
+  color: #333;
+}
+
+.admin-table td {
+  background-color: #fff;
+}
+
+.admin-table .delete-button {
+  background-color: #d9534f;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.admin-table .delete-button:hover {
+  background-color: #c9302c;
+}
