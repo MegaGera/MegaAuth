@@ -2,12 +2,95 @@
 <html>
 <head>
   <title>MegaAuth Login</title>
+  <style>
+    /* Reset some default styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Set the background and center content */
+    body {
+      background-color: #f0f0f0; /* Slightly gray background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* Container styling */
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .form-container {
+      background-color: #ffe5e5; /* Slightly red background */
+      border-radius: 15px; /* Rounded corners */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+      padding: 30px;
+      width: 100%;
+      max-width: 400px; /* Restrict max width */
+      text-align: center;
+    }
+
+    /* Logo styling */
+    .form-container img {
+      max-width: 100%; /* Responsive sizing */
+      max-height: 80px; /* Restrict height */
+      margin-bottom: 20px; /* Space below the logo */
+    }
+
+    /* Form styling */
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 5px;
+      text-align: left;
+      color: #555;
+    }
+
+    input {
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #d9534f; /* Slightly darker red */
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #c9302c;
+    }
+
+    #login-span {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
 
   <div class="container">
     <div class="form-container">
-      <h2>Login</h2>
+      <img src="https://megamedia.megagera.com/megagera/MG_logo_lt.png">
       <form id="login-form">
         <label for="login-username">Username</label>
         <input type="text" id="login-username" name="username" required>
