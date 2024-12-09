@@ -25,6 +25,16 @@ const validateJWT = (req, res, next) => {
   next();
 };
 
+const validateAdmin = (req, res, next) => {
+  validateJWT(req, res, () => {
+    if (req.body.data.permissions.some(p => p.type === 'admin')) {
+      next();
+    } else {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+  });
+};
+
 app.get('/', async (req, res) => {
   const token = req.cookies.access_token;
   if (!token) return res.render('login');
@@ -62,7 +72,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/register', validateJWT, async (req, res) => {
+app.post('/register', validateAdmin, async (req, res) => {
   const { username, password } = req.body;
   try {
     const id = await UserRepository.create({ username, password });
@@ -72,7 +82,7 @@ app.post('/register', validateJWT, async (req, res) => {
   }
 });
 
-app.post('/delete', validateJWT, async (req, res) => {
+app.post('/delete', validateAdmin, async (req, res) => {
   const { username } = req.body;
   try {
     const id = await UserRepository.delete({ username });
@@ -82,7 +92,7 @@ app.post('/delete', validateJWT, async (req, res) => {
   }
 });
 
-app.patch('/permissions', validateJWT, async (req, res) => {
+app.patch('/permissions', validateAdmin, async (req, res) => {
   const { username, permissions, action } = req.body;
   try {
     const id = await UserRepository.updatePermissions({ username, permissions, action });
@@ -99,9 +109,12 @@ app.post('/logout', (req, res) => {
     )
     .json({ message: 'Logged out' });
 });
-
 app.get('/validate', validateJWT, (req, res) => {
   return res.status(200).json({ message: 'Validated' });
+});
+
+app.get('/validate/admin', validateAdmin, (req, res) => {
+  return res.status(200).json({ message: 'Validated as Admin' });
 });
 
 app.get('/validate/megagoal', validateJWT, (req, res) => {

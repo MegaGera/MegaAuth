@@ -11,7 +11,7 @@
   <div class="container">
     <div class="form-container">
       <div class="greetings">
-        <h2>Hola <%= data.username %></h2>
+        <h2>Welcome <%= data.username %></h2>
       </div>
       <button id="close-session" class="logout-button">Cerrar Sesión</button>
       <% if (data.permissions.some(p => p.type === 'admin')) { %>
