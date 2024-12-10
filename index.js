@@ -102,6 +102,28 @@ app.patch('/permissions', validateAdmin, async (req, res) => {
   }
 });
 
+app.post('/change-password', validateJWT, async (req, res) => {
+  const { oldPassword } = req.body;
+  const { newPassword } = req.body;
+  const { username } = req.body.data;
+  try {
+    const id = await UserRepository.changePassword({ username, oldPassword, newPassword });
+    return res.send({ id });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/reset-password', validateAdmin, async (req, res) => {
+  const { username } = req.body;
+  try {
+    const id = await UserRepository.resetPassword({ username });
+    return res.send({ id });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
 app.post('/logout', (req, res) => {
   return res
     .clearCookie('access_token'

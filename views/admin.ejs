@@ -14,20 +14,22 @@
         <h2>Welcome <%= data.username %></h2>
       </div>
       <button id="close-session" class="logout-button">Cerrar Sesión</button>
+
+      <div class="admin-section">
+        <h2>Change Password</h2>
+        <form id="change-password-form">
+          <label for="change-password-old">Old Password</label>
+          <input type="password" id="change-password-old" name="old-password" required>
+          <label for="change-password-new">New Password:</label>
+          <input type="password" id="change-password-new" name="new-password" required>
+          <label for="change-password-new-confirm">Confirm New Password:</label>
+          <input type="password" id="change-password-new-confirm" name="confirm-password-new" required>
+          <button type="submit" class="form-button">Change Password</button>
+          <span id="change-password-span">&nbsp;</span>
+        </form>
+      </div>
+
       <% if (data.permissions.some(p => p.type === 'admin')) { %>
-        <div class="admin-section">
-          <h2>Register</h2>
-          <form id="register-form">
-            <label for="register-username">Username</label>
-            <input type="text" id="register-username" name="username" required>
-            <label for="register-password">Password:</label>
-            <input type="password" id="register-password" name="password" required>
-            <label for="register-confirm-password">Confirm Password:</label>
-            <input type="password" id="register-confirm-password" name="confirm-password" required>
-            <button type="submit" class="form-button">Register</button>
-            <span id="register-span">&nbsp;</span>
-          </form>
-        </div>
 
         <div class="admin-section">
           <h2>Users</h2>
@@ -53,12 +55,33 @@
                 </td>
                 <td>
                   <button class="delete-button" data-userid="<%= user.username %>">Delete</button>
+                  <button class="reset-password-button" data-userid="<%= user.username %>">Reset Password</button>
                 </td>
               </tr>
             <% }); %>
           </table>
         </div>
+
+        <div class="admin-section">
+          <h2>Register</h2>
+          <form id="register-form">
+            <label for="register-username">Username</label>
+            <input type="text" id="register-username" name="username" required>
+            <label for="register-password">Password:</label>
+            <input type="password" id="register-password" name="password" required>
+            <label for="register-confirm-password">Confirm Password:</label>
+            <input type="password" id="register-confirm-password" name="confirm-password" required>
+            <button type="submit" class="form-button">Register</button>
+            <span id="register-span">&nbsp;</span>
+          </form>
+        </div>
+
       <% } %>
+
+      <div class="admin-section">
+        <button id="redirect-megagoal" class="megagoal-button" onclick="window.location.href='https://megagoal.megagera.com'">Go to MegaGoal</button>
+      </div>
+
     </div>
   </div>
 
@@ -102,6 +125,41 @@
       });
     });
 
+    const changePasswordForm = $('#change-password-form');
+    const changePasswordSpan = $('#change-password-span');
+
+    changePasswordForm?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const oldPassword = $('#change-password-old').value;
+      const newPassword = $('#change-password-new').value;
+      const confirmPassword = $('#change-password-new-confirm').value;
+
+      if (newPassword !== confirmPassword) {
+        changePasswordSpan.innerText = 'New passwords do not match';
+        changePasswordSpan.style.color = 'red';
+        return;
+      }
+
+      fetch('/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ oldPassword, newPassword })
+      }).then(res => {
+        if (res.ok) {
+          changePasswordSpan.innerText = 'Password changed successfully';
+          changePasswordSpan.style.color = 'green';
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 2000);
+        } else {
+          changePasswordSpan.innerText = 'Password change failed';
+          changePasswordSpan.style.color = 'red';
+        }
+      });
+    });
+
     logoutButton?.addEventListener('click', async e => {
       e.preventDefault();
       fetch('/logout', {
@@ -111,7 +169,6 @@
         }
       }).then(res => {
         if (res.ok) {
-          console.log(res)
           window.location.href = '/';
         }
       });
@@ -122,8 +179,26 @@
       button.addEventListener('click', async e => {
         e.preventDefault();
         const username = e.target.getAttribute('data-userid');
-        console.log(username)
         fetch('/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username })
+        }).then(res => {
+          if (res.ok) {
+            window.location.href = '/';
+          }
+        });
+      });
+    });
+
+    const resetPasswordButtons = document.querySelectorAll('.reset-password-button');
+    resetPasswordButtons.forEach(button => {
+      button.addEventListener('click', async e => {
+        e.preventDefault();
+        const username = e.target.getAttribute('data-userid');
+        fetch('/reset-password', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

@@ -87,6 +87,24 @@ input {
 .form-button:hover {
   background-color: #c9302c;
 }
+.megagoal-button {
+  background-color: #28a745; /* Green */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.3s, transform 0.3s;
+  font-size: 18px; /* Bigger font size */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Cool shadow */
+}
+
+.megagoal-button:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Slightly larger shadow on hover */
+}
 
 #register-span {
   display: block;
@@ -138,4 +156,16 @@ input {
 
 .admin-table .delete-button:hover {
   background-color: #c9302c;
+}
+.admin-table .reset-password-button {
+  background-color: #5bc0de; /* Light blue */
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.admin-table .reset-password-button:hover {
+  background-color: #31b0d5;
 }

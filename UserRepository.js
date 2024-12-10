@@ -97,6 +97,39 @@ export class UserRepository {
     user.save();
     return user._id;
   }
+
+  // Change user password
+  static async changePassword ({ username, oldPassword, newPassword }) {
+    Validation.username(username);
+    Validation.password(newPassword);
+
+    const user = User.findOne({ username });
+    if (!user) throw new Error('User not found');
+
+    const isValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isValid) throw new Error('Old password is invalid');
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.save();
+
+    return user._id;
+  }
+
+  // Reset user password by admin
+  static async resetPassword ({ username }) {
+    Validation.username(username);
+
+    const user = User.findOne({ username });
+    if (!user) throw new Error('User not found');
+
+    const newPassword = username;
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.save();
+
+    return user._id;
+  }
 }
 
 // Validation class
