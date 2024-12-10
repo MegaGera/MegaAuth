@@ -48,13 +48,11 @@
         if (res.ok) {
           loginSpan.innerText = 'Login successful';
           loginSpan.style.color = 'green';
-          setTimeout(() => {
-            if (redirectParam) {
-              window.location.href = redirectParam;
-            } else {
-              window.location.href = '/';
-            }
-          }, 2000);
+          if (redirectParam) {
+            window.location.href = redirectParam;
+          } else {
+            window.location.href = '/';
+          }
         } else {
           loginSpan.innerText = 'Login failed';
           loginSpan.style.color = 'red';
