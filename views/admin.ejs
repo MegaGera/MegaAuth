@@ -38,6 +38,7 @@
               <th>Username</th>
               <th>MegaGoal</th>
               <th>MegaDocu</th>
+              <th>MegaMedia</th>
               <th>Admin</th>
               <th>Actions</th>
             </tr>
@@ -49,6 +50,9 @@
                 </td>
                 <td>
                   <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megadocu" <%= user.permissions && user.permissions.some(p => p.name === 'megadocu') ? 'checked' : '' %>>
+                </td>
+                <td>
+                  <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megamedia" <%= user.permissions && user.permissions.some(p => p.name === 'megamedia') ? 'checked' : '' %>>
                 </td>
                 <td>
                   <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="admin" <%= user.permissions && user.permissions.some(p => p.type === 'admin') ? 'checked' : '' %>>

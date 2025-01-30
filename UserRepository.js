@@ -154,6 +154,8 @@ class Permission {
         return Permission.generateMegaDocu();
       case 'megagoal':
         return Permission.generateMegaGoal();
+      case 'megamedia':
+        return Permission.generateMegaMedia();
       default:
         throw new Error('Invalid permission');
     }
@@ -170,5 +172,9 @@ class Permission {
   static generateMegaGoal () {
     const apikey = crypto.randomUUID().replace(/-/g, '');
     return { type: 'access', name: 'megagoal', url: 'https://megagoal.megagera.com', apikey };
+  }
+
+  static generateMegaMedia () {
+    return { type: 'access', name: 'megamedia', url: 'https://megamedia.megagera.com' };
   }
 }

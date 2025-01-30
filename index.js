@@ -155,6 +155,14 @@ app.get('/validate/megadocu', validateJWT, (req, res) => {
   }
 });
 
+app.get('/validate/megamedia', validateJWT, (req, res) => {
+  if (req.body.data.permissions.some(p => p.name === 'megamedia')) {
+    return res.status(200).json({ message: 'Validated' });
+  } else {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+});
+
 const PORT = process.env.PORT || 3150;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
