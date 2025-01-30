@@ -35,7 +35,7 @@
 
     loginForm?.addEventListener('submit', async e => {
       e.preventDefault();
-      const username = $('#login-username').value;
+      const username = $('#login-username').value.trim();
       const password = $('#login-password').value;
 
       fetch('/login', {
