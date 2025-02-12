@@ -132,7 +132,7 @@ app.post('/logout', (req, res) => {
     .json({ message: 'Logged out' });
 });
 app.get('/validate', validateJWT, (req, res) => {
-  return res.status(200).json({ message: 'Validated' });
+  return res.status(200).json({ message: 'Validated', data: req.body.data });
 });
 
 app.get('/validate/admin', validateAdmin, (req, res) => {
