@@ -1,32 +1,28 @@
 import DBLocal from 'db-local';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
+import { USER_SCHEMA, extractPublicUser } from './config/userConfig.js';
 
 const { Schema } = new DBLocal({ path: './db' });
 
 // User schema
-const User = Schema('User', {
-  _id: { type: String, required: true },
-  username: { type: String, required: true },
-  password: { type: String, required: true },
-  permissions: { type: Array }
-});
-
-// Public User schema
-const getPublicUser = (user) => {
-  const { password: _, ...publicUser } = user;
-  return publicUser;
-};
+const User = Schema('User', USER_SCHEMA);
 
 // UserRepository class
 export class UserRepository {
   // Create a new user
-  static async create ({ username, password }) {
+  static async create ({ username, password, email }) {
     Validation.username(username);
     Validation.password(password);
+    if (email) Validation.email(email);
 
     const user = User.findOne({ username });
     if (user) throw new Error('User already exists');
+
+    if (email) {
+      const emailUser = User.findOne({ email });
+      if (emailUser) throw new Error('Email already in use');
+    }
 
     const id = crypto.randomUUID();
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -35,7 +31,8 @@ export class UserRepository {
       _id: id,
       username,
       password: hashedPassword,
-      permissions: []
+      email: email || null,
+      permissions: [Permission.generateMegaGoal()]
     }).save();
 
     return id;
@@ -46,18 +43,23 @@ export class UserRepository {
     Validation.username(username);
     Validation.password(password);
 
-    const user = User.findOne({ username });
+    // Try to find user by username first, then by email
+    let user = User.findOne({ username });
+    if (!user) {
+      // If not found by username, try by email
+      user = User.findOne({ email: username });
+    }
     if (!user) throw new Error('User not found');
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) throw new Error('Invalid password');
 
-    return getPublicUser(user);
+    return extractPublicUser(user);
   };
 
   // Get all users
   static async findAll () {
-    return User.find().map(getPublicUser);
+    return User.find().map(extractPublicUser);
   }
 
   // Delete a user
@@ -141,6 +143,12 @@ class Validation {
 
   static password (password) {
     if (typeof password !== 'string') throw new Error('Password must be a string');
+  }
+
+  static email (email) {
+    if (typeof email !== 'string') throw new Error('Email must be a string');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) throw new Error('Invalid email address');
   }
 }
 

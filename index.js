@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 
 import { UserRepository } from './UserRepository.js';
+import { extractJwtPayload } from './config/userConfig.js';
 
 const app = express();
 
@@ -52,7 +53,7 @@ app.post('/login', async (req, res) => {
   try {
     const user = await UserRepository.login({ username, password });
     const token = jwt.sign(
-      { id: user._id, username: user.username, permissions: user.permissions },
+      extractJwtPayload(user),
       process.env.SECRET_JWT_KEY,
       { expiresIn: '1h' });
     return res
@@ -72,14 +73,30 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/register', validateAdmin, async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const id = await UserRepository.create({ username, password });
-    return res.send({ id });
-  } catch (error) {
-    return res.status(400).json({ error: error.message });
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
+app.post('/register', (req, res) => {
+  const { username, password, email } = req.body;
+  if (!email || email.trim() === '') {
+    // Only admins can register users without email
+    return validateAdmin(req, res, async () => {
+      try {
+        const id = await UserRepository.create({ username, password, email: undefined });
+        return res.send({ id });
+      } catch (error) {
+        return res.status(400).json({ error: error.message });
+      }
+    });
   }
+  // Public registration (email required)
+  if (!email || email.trim() === '') {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+  UserRepository.create({ username, password, email })
+    .then(id => res.send({ id }))
+    .catch(error => res.status(400).json({ error: error.message }));
 });
 
 app.post('/delete', validateAdmin, async (req, res) => {

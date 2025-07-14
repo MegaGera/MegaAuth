@@ -15,6 +15,13 @@
       </div>
       <button id="close-session" class="logout-button">Cerrar Sesión</button>
 
+      <% if (data.email) { %>
+        <div class="admin-section">
+          <h2>Your Email</h2>
+          <h5><%= data.email %></h5>
+        </div>
+      <% } %>
+
       <div class="admin-section">
         <h2>Change Password</h2>
         <form id="change-password-form">
@@ -36,6 +43,7 @@
           <table class="admin-table">
             <tr>
               <th>Username</th>
+              <th>Email</th>
               <th>MegaGoal</th>
               <th>MegaDocu</th>
               <th>MegaMedia</th>
@@ -45,6 +53,7 @@
             <% users.forEach(user => { %>
               <tr>
                 <td><%= user.username %></td>
+                <td><%= user.email || '-' %></td>
                 <td>
                   <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megagoal" <%= user.permissions && user.permissions.some(p => p.name === 'megagoal') ? 'checked' : '' %>>
                 </td>
@@ -71,6 +80,8 @@
           <form id="register-form">
             <label for="register-username">Username</label>
             <input type="text" id="register-username" name="username" required>
+            <label for="register-email">Email</label>
+            <input type="email" id="register-email" name="email">
             <label for="register-password">Password:</label>
             <input type="password" id="register-password" name="password" required>
             <label for="register-confirm-password">Confirm Password:</label>
@@ -99,9 +110,10 @@
 
     registerForm?.addEventListener('submit', async e => {
       e.preventDefault();
-      const username = $('#register-username').value;
-      const password = $('#register-password').value;
-      const confirmPassword = $('#register-confirm-password').value;
+      const username = $('#register-username').value.trim();
+      const email = $('#register-email').value.trim();
+      const password = $('#register-password').value.trim();
+      const confirmPassword = $('#register-confirm-password').value.trim();
 
       if (password !== confirmPassword) {
         registerSpan.innerText = 'Passwords do not match';
@@ -114,7 +126,7 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password, email: email || undefined })
       }).then(res => {
         if (res.ok) {
           registerSpan.innerText = 'Register successful';
