@@ -97,7 +97,7 @@ Run `npm run start:dev` for a dev server. The application will automatically rel
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the GPL-3.0 License. See the LICENSE file for details.
 
 ## Contact & Collaborate
 
