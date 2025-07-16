@@ -2,6 +2,7 @@ import './config/loadEnv.js';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 import { UserRepository } from './UserRepository.js';
 import { extractJwtPayload } from './config/userConfig.js';
@@ -13,6 +14,22 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
+
+// Add CORS middleware to allow all subdomains and the root domain of megagera.com only in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, false); // block non-browser requests
+      const megageraRegex = /^https:\/\/(.*\.)?megagera\.com$/;
+      if (megageraRegex.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true
+  }));
+}
 
 const validateJWT = (req, res, next) => {
   const token = req.cookies.access_token;
@@ -45,6 +62,15 @@ app.get('/', async (req, res) => {
     return res.render('admin', { data, users });
   } catch (error) {
     return res.render('login');
+  }
+});
+
+app.get('/users', validateJWT, async (req, res) => {
+  try {
+    const users = await UserRepository.findAll();
+    return res.render('users', { users });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to load users' });
   }
 });
 

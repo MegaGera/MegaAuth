@@ -5,108 +5,167 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MegaAuth Admin</title>
   <link rel="stylesheet" href="styles/admin.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-
-  <div class="container">
-    <div class="form-container">
-      <div class="greetings">
-        <h2>Welcome <%= data.username %></h2>
-      </div>
-      <button id="close-session" class="logout-button">Cerrar Sesión</button>
-
-      <% if (data.email) { %>
-        <div class="admin-section">
-          <h2>Your Email</h2>
-          <h5><%= data.email %></h5>
+  <div class="dashboard">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <h1><i class="fas fa-shield-alt"></i>MegaAuth</h1>
         </div>
-      <% } %>
-
-      <div class="admin-section">
-        <h2>Change Password</h2>
-        <form id="change-password-form">
-          <label for="change-password-old">Old Password</label>
-          <input type="password" id="change-password-old" name="old-password" required>
-          <label for="change-password-new">New Password:</label>
-          <input type="password" id="change-password-new" name="new-password" required>
-          <label for="change-password-new-confirm">Confirm New Password:</label>
-          <input type="password" id="change-password-new-confirm" name="confirm-password-new" required>
-          <button type="submit" class="form-button">Change Password</button>
-          <span id="change-password-span">&nbsp;</span>
-        </form>
-      </div>
-
-      <% if (data.permissions.some(p => p.type === 'admin')) { %>
-
-        <div class="admin-section">
-          <h2>Users</h2>
-          <table class="admin-table">
-            <tr>
-              <th>Username</th>
-              <th>Email</th>
-              <th>MegaGoal</th>
-              <th>MegaDocu</th>
-              <th>MegaMedia</th>
-              <th>Admin</th>
-              <th>Actions</th>
-            </tr>
-            <% users.forEach(user => { %>
-              <tr>
-                <td><%= user.username %></td>
-                <td><%= user.email || '-' %></td>
-                <td>
-                  <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megagoal" <%= user.permissions && user.permissions.some(p => p.name === 'megagoal') ? 'checked' : '' %>>
-                </td>
-                <td>
-                  <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megadocu" <%= user.permissions && user.permissions.some(p => p.name === 'megadocu') ? 'checked' : '' %>>
-                </td>
-                <td>
-                  <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="megamedia" <%= user.permissions && user.permissions.some(p => p.name === 'megamedia') ? 'checked' : '' %>>
-                </td>
-                <td>
-                  <input class="checkbox-permissions" type="checkbox" data-userid="<%= user.username %>" data-permissions="admin" <%= user.permissions && user.permissions.some(p => p.type === 'admin') ? 'checked' : '' %>>
-                </td>
-                <td>
-                  <button class="delete-button" data-userid="<%= user.username %>">Delete</button>
-                  <button class="reset-password-button" data-userid="<%= user.username %>">Reset Password</button>
-                </td>
-              </tr>
-            <% }); %>
-          </table>
+        <div class="header-right">
+          <button id="redirect-megagoal" class="megagoal-button" onclick="window.location.href='https://megagoal.megagera.com'">
+            <i class="fas fa-rocket"></i> Go to MegaGoal
+          </button>
+          <button id="close-session" class="logout-button">
+            <i class="fas fa-sign-out-alt"></i> Sign Out
+          </button>
         </div>
+      </div>
+    </header>
 
-        <div class="admin-section">
-          <h2>Register</h2>
-          <form id="register-form">
-            <label for="register-username">Username</label>
-            <input type="text" id="register-username" name="username" required>
-            <label for="register-email">Email</label>
-            <input type="email" id="register-email" name="email">
-            <label for="register-password">Password:</label>
-            <input type="password" id="register-password" name="password" required>
-            <label for="register-confirm-password">Confirm Password:</label>
-            <input type="password" id="register-confirm-password" name="confirm-password" required>
-            <button type="submit" class="form-button">Register</button>
-            <span id="register-span">&nbsp;</span>
-          </form>
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="container">
+        <!-- User Info and Password Row -->
+        <div class="user-password-row">
+          <!-- User Info Card -->
+          <div class="card user-info-card">
+            <div class="card-header">
+              <i class="fas fa-user-circle"></i>
+              <h2>Your Account</h2>
+            </div>
+            <div class="card-content">
+              <% if (data.email) { %>
+                <div class="info-item">
+                  <span class="label">Email:</span>
+                  <span class="value"><%= data.email %></span>
+                </div>
+              <% } %>
+              <div class="info-item">
+                <span class="label">Username:</span>
+                <span class="value"><%= data.username %></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Password Card -->
+          <div class="card password-card">
+            <div class="card-header">
+              <i class="fas fa-key"></i>
+              <h2>Change Password</h2>
+            </div>
+            <div class="card-content">
+              <form id="change-password-form">
+                <div class="form-group">
+                  <label for="change-password-old">Current Password</label>
+                  <input type="password" id="change-password-old" name="old-password" required>
+                </div>
+                <div class="form-group">
+                  <label for="change-password-new">New Password</label>
+                  <input type="password" id="change-password-new" name="new-password" required>
+                </div>
+                <div class="form-group">
+                  <label for="change-password-new-confirm">Confirm New Password</label>
+                  <input type="password" id="change-password-new-confirm" name="confirm-password-new" required>
+                </div>
+                <button type="submit" class="btn-primary">
+                  <i class="fas fa-save"></i> Update Password
+                </button>
+                <div id="change-password-message" class="message"></div>
+              </form>
+            </div>
+          </div>
         </div>
 
-      <% } %>
+        <% if (data.permissions.some(p => p.type === 'admin')) { %>
+          <!-- Admin Actions Cards -->
+          <div class="admin-actions">
+            <div class="card action-card">
+              <div class="card-header">
+                <i class="fas fa-users"></i>
+                <h2>User Management</h2>
+              </div>
+              <div class="card-content">
+                <p>Manage users, permissions, and system access.</p>
+                <a href="/users" class="btn-secondary">
+                  <i class="fas fa-arrow-right"></i> Manage Users
+                </a>
+              </div>
+            </div>
 
-      <div class="admin-section">
-        <button id="redirect-megagoal" class="megagoal-button" onclick="window.location.href='https://megagoal.megagera.com'">Go to MegaGoal</button>
+            <div class="card action-card">
+              <div class="card-header">
+                <i class="fas fa-user-plus"></i>
+                <h2>Add New User</h2>
+              </div>
+              <div class="card-content">
+                <p>Register new users to the system.</p>
+                <button class="btn-secondary" onclick="showAddUserModal()">
+                  <i class="fas fa-plus"></i> Add User
+                </button>
+              </div>
+            </div>
+          </div>
+        <% } %>
       </div>
+    </div>
+  </div>
 
+  <!-- Add User Modal -->
+  <div id="add-user-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus"></i> Add New User</h3>
+        <button class="close-modal" onclick="hideAddUserModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="register-form">
+        <div class="form-group">
+          <label for="register-username">Username</label>
+          <input type="text" id="register-username" name="username" required>
+        </div>
+        <div class="form-group">
+          <label for="register-email">Email</label>
+          <input type="email" id="register-email" name="email">
+        </div>
+        <div class="form-group">
+          <label for="register-password">Password</label>
+          <input type="password" id="register-password" name="password" required>
+        </div>
+        <div class="form-group">
+          <label for="register-confirm-password">Confirm Password</label>
+          <input type="password" id="register-confirm-password" name="confirm-password" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="hideAddUserModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Add User</button>
+        </div>
+        <div id="register-message" class="message"></div>
+      </form>
     </div>
   </div>
 
   <script>
     const $ = el => document.querySelector(el);
 
-    const registerForm = $('#register-form');
-    const registerSpan = $('#register-span');
+    // Modal functionality
+    function showAddUserModal() {
+      $('#add-user-modal').style.display = 'flex';
+    }
 
-    const logoutButton = $('#close-session');
+    function hideAddUserModal() {
+      $('#add-user-modal').style.display = 'none';
+      $('#register-form').reset();
+      $('#register-message').textContent = '';
+    }
+
+    // Register form
+    const registerForm = $('#register-form');
+    const registerMessage = $('#register-message');
 
     registerForm?.addEventListener('submit', async e => {
       e.preventDefault();
@@ -116,33 +175,40 @@
       const confirmPassword = $('#register-confirm-password').value.trim();
 
       if (password !== confirmPassword) {
-        registerSpan.innerText = 'Passwords do not match';
-        registerSpan.style.color = 'red';
+        registerMessage.textContent = 'Passwords do not match';
+        registerMessage.className = 'message error';
         return;
       }
 
-      fetch('/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, password, email: email || undefined })
-      }).then(res => {
-        if (res.ok) {
-          registerSpan.innerText = 'Register successful';
-          registerSpan.style.color = 'green';
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password, email: email || undefined })
+        });
+
+        if (response.ok) {
+          registerMessage.textContent = 'User added successfully!';
+          registerMessage.className = 'message success';
           setTimeout(() => {
-            window.location.href = '/';
+            hideAddUserModal();
+            window.location.reload();
           }, 2000);
         } else {
-          registerSpan.innerText = 'Register failed';
-          registerSpan.style.color = 'red';
+          registerMessage.textContent = 'Failed to add user';
+          registerMessage.className = 'message error';
         }
-      });
+      } catch (error) {
+        registerMessage.textContent = 'An error occurred';
+        registerMessage.className = 'message error';
+      }
     });
 
+    // Change password form
     const changePasswordForm = $('#change-password-form');
-    const changePasswordSpan = $('#change-password-span');
+    const changePasswordMessage = $('#change-password-message');
 
     changePasswordForm?.addEventListener('submit', async e => {
       e.preventDefault();
@@ -151,105 +217,63 @@
       const confirmPassword = $('#change-password-new-confirm').value;
 
       if (newPassword !== confirmPassword) {
-        changePasswordSpan.innerText = 'New passwords do not match';
-        changePasswordSpan.style.color = 'red';
+        changePasswordMessage.textContent = 'New passwords do not match';
+        changePasswordMessage.className = 'message error';
         return;
       }
 
-      fetch('/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ oldPassword, newPassword })
-      }).then(res => {
-        if (res.ok) {
-          changePasswordSpan.innerText = 'Password changed successfully';
-          changePasswordSpan.style.color = 'green';
+      try {
+        const response = await fetch('/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ oldPassword, newPassword })
+        });
+
+        if (response.ok) {
+          changePasswordMessage.textContent = 'Password changed successfully!';
+          changePasswordMessage.className = 'message success';
           setTimeout(() => {
-            window.location.href = '/';
+            window.location.reload();
           }, 2000);
         } else {
-          changePasswordSpan.innerText = 'Password change failed';
-          changePasswordSpan.style.color = 'red';
+          changePasswordMessage.textContent = 'Password change failed';
+          changePasswordMessage.className = 'message error';
         }
-      });
+      } catch (error) {
+        changePasswordMessage.textContent = 'An error occurred';
+        changePasswordMessage.className = 'message error';
+      }
     });
 
+    // Logout functionality
+    const logoutButton = $('#close-session');
     logoutButton?.addEventListener('click', async e => {
       e.preventDefault();
-      fetch('/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }).then(res => {
-        if (res.ok) {
+      try {
+        const response = await fetch('/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
           window.location.href = '/';
         }
-      });
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
     });
 
-    const deleteUserButtons = document.querySelectorAll('.delete-button');
-    deleteUserButtons.forEach(button => {
-      button.addEventListener('click', async e => {
-        e.preventDefault();
-        const username = e.target.getAttribute('data-userid');
-        fetch('/delete', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ username })
-        }).then(res => {
-          if (res.ok) {
-            window.location.href = '/';
-          }
-        });
-      });
+    // Close modal when clicking outside
+    window.addEventListener('click', function(e) {
+      const modal = $('#add-user-modal');
+      if (e.target === modal) {
+        hideAddUserModal();
+      }
     });
-
-    const resetPasswordButtons = document.querySelectorAll('.reset-password-button');
-    resetPasswordButtons.forEach(button => {
-      button.addEventListener('click', async e => {
-        e.preventDefault();
-        const username = e.target.getAttribute('data-userid');
-        fetch('/reset-password', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ username })
-        }).then(res => {
-          if (res.ok) {
-            window.location.href = '/';
-          }
-        });
-      });
-    });
-
-    const checkboxesPermissions = document.querySelectorAll('.checkbox-permissions');
-    checkboxesPermissions.forEach(checkbox => {
-      checkbox.addEventListener('change', async e => {
-        const username = e.target.getAttribute('data-userid');
-        const permissions = e.target.getAttribute('data-permissions');
-        const action = e.target.checked;
-        fetch('/permissions', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ username, 
-            permissions,
-            action })
-        }).then(res => {
-          if (res.ok) {
-            window.location.href = '/';
-          }
-        });
-      });
-    });
-
   </script>
 </body>
 </html>

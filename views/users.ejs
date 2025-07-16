@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MegaAuth - User Management</title>
+  <link rel="stylesheet" href="styles/users.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <h1><i class="fas fa-users"></i> User Management</h1>
+          <p class="user-count">Total Users: <span id="user-count"><%= users.length %></span></p>
+        </div>
+        <div class="header-right">
+          <a href="/" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Admin
+          </a>
+          <button id="close-session" class="logout-button">
+            <i class="fas fa-sign-out-alt"></i> Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-container">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="search-input" placeholder="Search by username or email...">
+        </div>
+        <div class="search-filters">
+          <select id="permission-filter">
+            <option value="">All Permissions</option>
+            <option value="megagoal">MegaGoal</option>
+            <option value="megadocu">MegaDocu</option>
+            <option value="megamedia">MegaMedia</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-container">
+      <div class="table-header">
+        <h2>Users List</h2>
+        <button class="add-user-btn" onclick="showAddUserModal()">
+          <i class="fas fa-plus"></i> Add User
+        </button>
+      </div>
+      
+      <div class="table-wrapper">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Permissions</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <% users.forEach(user => { %>
+              <tr class="user-row" data-username="<%= user.username %>" data-email="<%= user.email || '' %>">
+                <td class="username-cell">
+                  <div class="user-info">
+                    <div class="user-avatar">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <span><%= user.username %></span>
+                  </div>
+                </td>
+                <td class="email-cell"><%= user.email || '-' %></td>
+                <td class="permissions-cell">
+                  <div class="permissions-grid">
+                    <label class="permission-toggle">
+                      <input type="checkbox" class="permission-checkbox" 
+                             data-userid="<%= user.username %>" 
+                             data-permissions="megagoal"
+                             <%= user.permissions && user.permissions.some(p => p.name === 'megagoal') ? 'checked' : '' %>>
+                      <span class="toggle-label">MegaGoal</span>
+                    </label>
+                    <label class="permission-toggle">
+                      <input type="checkbox" class="permission-checkbox" 
+                             data-userid="<%= user.username %>" 
+                             data-permissions="megadocu"
+                             <%= user.permissions && user.permissions.some(p => p.name === 'megadocu') ? 'checked' : '' %>>
+                      <span class="toggle-label">MegaDocu</span>
+                    </label>
+                    <label class="permission-toggle">
+                      <input type="checkbox" class="permission-checkbox" 
+                             data-userid="<%= user.username %>" 
+                             data-permissions="megamedia"
+                             <%= user.permissions && user.permissions.some(p => p.name === 'megamedia') ? 'checked' : '' %>>
+                      <span class="toggle-label">MegaMedia</span>
+                    </label>
+                    <label class="permission-toggle">
+                      <input type="checkbox" class="permission-checkbox" 
+                             data-userid="<%= user.username %>" 
+                             data-permissions="admin"
+                             <%= user.permissions && user.permissions.some(p => p.type === 'admin') ? 'checked' : '' %>>
+                      <span class="toggle-label">Admin</span>
+                    </label>
+                  </div>
+                </td>
+                <td class="actions-cell">
+                  <div class="action-buttons">
+                    <button class="action-btn reset-btn" data-userid="<%= user.username %>" title="Reset Password">
+                      <i class="fas fa-key"></i>
+                    </button>
+                    <button class="action-btn delete-btn" data-userid="<%= user.username %>" title="Delete User">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div id="add-user-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus"></i> Add New User</h3>
+        <button class="close-modal" onclick="hideAddUserModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="add-user-form">
+        <div class="form-group">
+          <label for="new-username">Username</label>
+          <input type="text" id="new-username" name="username" required>
+        </div>
+        <div class="form-group">
+          <label for="new-email">Email</label>
+          <input type="email" id="new-email" name="email">
+        </div>
+        <div class="form-group">
+          <label for="new-password">Password</label>
+          <input type="password" id="new-password" name="password" required>
+        </div>
+        <div class="form-group">
+          <label for="new-confirm-password">Confirm Password</label>
+          <input type="password" id="new-confirm-password" name="confirm-password" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="hideAddUserModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Add User</button>
+        </div>
+        <div id="add-user-message" class="message"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const $ = el => document.querySelector(el);
+    const $$ = el => document.querySelectorAll(el);
+
+    // Search functionality
+    const searchInput = $('#search-input');
+    const userRows = $$('.user-row');
+    const userCount = $('#user-count');
+
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      let visibleCount = 0;
+
+      userRows.forEach(row => {
+        const username = row.getAttribute('data-username').toLowerCase();
+        const email = row.getAttribute('data-email').toLowerCase();
+        
+        if (username.includes(searchTerm) || email.includes(searchTerm)) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      userCount.textContent = visibleCount;
+    });
+
+    // Permission filter
+    const permissionFilter = $('#permission-filter');
+    permissionFilter.addEventListener('change', function() {
+      const selectedPermission = this.value;
+      
+      userRows.forEach(row => {
+        if (!selectedPermission) {
+          row.style.display = '';
+          return;
+        }
+
+        const checkboxes = row.querySelectorAll('.permission-checkbox');
+        let hasPermission = false;
+        
+        checkboxes.forEach(checkbox => {
+          if (checkbox.getAttribute('data-permissions') === selectedPermission && checkbox.checked) {
+            hasPermission = true;
+          }
+        });
+
+        row.style.display = hasPermission ? '' : 'none';
+      });
+    });
+
+    // Modal functionality
+    function showAddUserModal() {
+      $('#add-user-modal').style.display = 'flex';
+    }
+
+    function hideAddUserModal() {
+      $('#add-user-modal').style.display = 'none';
+      $('#add-user-form').reset();
+      $('#add-user-message').textContent = '';
+    }
+
+    // Add user form
+    const addUserForm = $('#add-user-form');
+    addUserForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      
+      const username = $('#new-username').value.trim();
+      const email = $('#new-email').value.trim();
+      const password = $('#new-password').value.trim();
+      const confirmPassword = $('#new-confirm-password').value.trim();
+      const messageEl = $('#add-user-message');
+
+      if (password !== confirmPassword) {
+        messageEl.textContent = 'Passwords do not match';
+        messageEl.className = 'message error';
+        return;
+      }
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            username, 
+            password, 
+            email: email || undefined 
+          })
+        });
+
+        if (response.ok) {
+          messageEl.textContent = 'User added successfully!';
+          messageEl.className = 'message success';
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          messageEl.textContent = 'Failed to add user';
+          messageEl.className = 'message error';
+        }
+      } catch (error) {
+        messageEl.textContent = 'An error occurred';
+        messageEl.className = 'message error';
+      }
+    });
+
+    // Logout functionality
+    const logoutButton = $('#close-session');
+    logoutButton.addEventListener('click', async e => {
+      e.preventDefault();
+      try {
+        const response = await fetch('/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          window.location.href = '/';
+        }
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
+    });
+
+    // Permission checkboxes
+    const permissionCheckboxes = $$('.permission-checkbox');
+    permissionCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', async e => {
+        const username = e.target.getAttribute('data-userid');
+        const permissions = e.target.getAttribute('data-permissions');
+        const action = e.target.checked;
+        
+        try {
+          const response = await fetch('/permissions', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              username, 
+              permissions,
+              action 
+            })
+          });
+          
+          if (response.ok) {
+            // Show success feedback
+            e.target.parentElement.classList.add('success');
+            setTimeout(() => {
+              e.target.parentElement.classList.remove('success');
+            }, 500);
+          } else {
+            // Revert checkbox if failed
+            e.target.checked = !action;
+          }
+        } catch (error) {
+          e.target.checked = !action;
+          console.error('Permission update failed:', error);
+        }
+      });
+    });
+
+    // Delete user buttons
+    const deleteButtons = $$('.delete-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', async e => {
+        e.preventDefault();
+        const username = e.target.closest('.delete-btn').getAttribute('data-userid');
+        
+        if (confirm(`Are you sure you want to delete user "${username}"?`)) {
+          try {
+            const response = await fetch('/delete', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ username })
+            });
+            
+            if (response.ok) {
+              window.location.reload();
+            }
+          } catch (error) {
+            console.error('Delete failed:', error);
+          }
+        }
+      });
+    });
+
+    // Reset password buttons
+    const resetButtons = $$('.reset-btn');
+    resetButtons.forEach(button => {
+      button.addEventListener('click', async e => {
+        e.preventDefault();
+        const username = e.target.closest('.reset-btn').getAttribute('data-userid');
+        
+        if (confirm(`Are you sure you want to reset password for user "${username}"?`)) {
+          try {
+            const response = await fetch('/reset-password', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ username })
+            });
+            
+            if (response.ok) {
+              alert(`Password reset successful for user "${username}"`);
+            }
+          } catch (error) {
+            console.error('Password reset failed:', error);
+          }
+        }
+      });
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(e) {
+      const modal = $('#add-user-modal');
+      if (e.target === modal) {
+        hideAddUserModal();
+      }
+    });
+  </script>
+</body>
+</html> 

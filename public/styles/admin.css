@@ -1,4 +1,4 @@
-/* General Reset */
+/* Modern CSS for Admin Dashboard */
 * {
   margin: 0;
   padding: 0;
@@ -6,166 +6,452 @@
   font-family: Arial, sans-serif;
 }
 
-/* Main layout */
 body {
-  background-color: #f0f0f0; /* Slightly gray background */
-  display: flex;
-  justify-content: center;
-  align-items: flex-start; /* Align admin panel near the top */
+  background-color: #f0f0f0;
   min-height: 100vh;
-  padding: 20px;
+  color: #333;
 }
 
-/* Container styling */
-.container {
-  width: 100%;
-  max-width: 900px;
-  background-color: #ffe5e5; /* Slightly red */
-  border-radius: 15px;
+.dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles */
+.header {
+  background-color: #ffe5e5;
+  border-bottom: 1px solid #ddd;
+  padding: 1rem 2rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 30px;
 }
 
-.greetings {
-  margin-bottom: 20px;
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-/* Form container */
-.form-container {
-  text-align: center;
+.header-left h1 {
+  color: #333;
+  font-size: 1.8rem;
+  font-weight: 600;
 }
 
-/* Logout button styling */
-.logout-button {
-  background-color: #d9534f; /* Red */
+.header-left h1 i {
+  color: #d9534f;
+  margin-right: 0.5rem;
+}
+
+.header-right {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.megagoal-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 12px;
+  background-color: #28a745;
   color: #fff;
   border: none;
-  padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
-  margin-bottom: 20px;
+  font-weight: 500;
   transition: background-color 0.3s;
+  font-size: 16px;
+}
+
+.megagoal-button:hover {
+  background-color: #218838;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 12px;
+  background-color: #d9534f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  font-size: 16px;
 }
 
 .logout-button:hover {
   background-color: #c9302c;
 }
 
-/* Form styling */
-form {
-  margin: 20px 0;
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  gap: 2rem;
+}
+
+/* User Password Row */
+.user-password-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* Card Styles */
+.card {
+  background-color: #ffe5e5;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+  background-color: #d9534f;
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
   align-items: center;
+  gap: 1rem;
 }
 
-label {
-  margin: 5px auto;
+.card-header i {
+  font-size: 1.5rem;
+}
+
+.card-header h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.card-content {
+  padding: 2rem;
+}
+
+/* User Info Card */
+.user-info-card .info-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.user-info-card .info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item .label {
+  font-weight: 500;
   color: #555;
-  align-self: flex-start;
+  margin-right: 1rem;
+  min-width: 80px;
 }
 
-input {
-  padding: 10px;
+.info-item .value {
+  color: #333;
+  font-weight: 500;
+}
+
+/* Password Card */
+.password-card .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.password-card label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: 500;
+  text-align: left;
+}
+
+.password-card input {
   width: 100%;
-  max-width: 300px;
-  margin-bottom: 15px;
+  padding: 12px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s;
 }
 
-.form-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
+.password-card input:focus {
+  outline: none;
+  border-color: #d9534f;
+  box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.2);
+}
+
+/* Admin Actions */
+.admin-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.action-card {
+  height: 100%;
+}
+
+.action-card .card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.action-card p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+/* Button Styles */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 12px;
   background-color: #d9534f;
   color: #fff;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.form-button:hover {
-  background-color: #c9302c;
-}
-.megagoal-button {
-  background-color: #28a745; /* Green */
-  color: #fff;
   border: none;
-  padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
-  margin-bottom: 20px;
-  transition: background-color 0.3s, transform 0.3s;
-  font-size: 18px; /* Bigger font size */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Cool shadow */
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  font-size: 16px;
 }
 
-.megagoal-button:hover {
-  background-color: #218838;
-  transform: scale(1.05);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Slightly larger shadow on hover */
+.btn-primary:hover {
+  background-color: #c9302c;
 }
 
-#register-span {
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 12px;
+  background: #ecf0f1;
+  color: #2c3e50;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 16px;
+}
+
+.btn-secondary:hover {
+  background: #d5dbdb;
+}
+
+/* Message Styles */
+.message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 5px;
+  font-weight: 500;
+  text-align: center;
+  font-size: 14px;
+  min-height: 20px;
+}
+
+.message.success {
+  background: rgba(39, 174, 96, 0.1);
+  color: #27ae60;
+  border: 1px solid rgba(39, 174, 96, 0.2);
+}
+
+.message.error {
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #ffe5e5;
+  border-radius: 15px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-header h3 {
+  color: #333;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.modal-header h3 i {
+  color: #d9534f;
+  margin-right: 0.5rem;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
   display: block;
-  margin-top: 10px;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: 500;
+  text-align: left;
   font-size: 14px;
 }
 
-/* Admin sections */
-.admin-section {
-  margin-top: 30px;
-}
-
-.admin-section h2 {
-  margin-bottom: 15px;
-  color: #333;
-}
-
-/* Table styling */
-.admin-table {
+.form-group input {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-.admin-table th,
-.admin-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: center;
-}
-
-.admin-table th {
-  background-color: #f8d7da; /* Light red header */
-  color: #333;
-}
-
-.admin-table td {
-  background-color: #fff;
-}
-
-.admin-table .delete-button {
-  background-color: #d9534f;
-  color: #fff;
-  border: none;
-  padding: 5px 10px;
+  padding: 12px;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  cursor: pointer;
+  font-size: 14px;
+  transition: border-color 0.3s;
 }
 
-.admin-table .delete-button:hover {
-  background-color: #c9302c;
-}
-.admin-table .reset-password-button {
-  background-color: #5bc0de; /* Light blue */
-  color: #fff;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
+.form-group input:focus {
+  outline: none;
+  border-color: #d9534f;
+  box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.2);
 }
 
-.admin-table .reset-password-button:hover {
-  background-color: #31b0d5;
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .header-right {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .user-password-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .admin-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .card-content {
+    padding: 1.5rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 1rem;
+  }
+  
+  .main-content {
+    padding: 0.5rem;
+  }
+  
+  .container {
+    gap: 1rem;
+  }
+  
+  .modal-content {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
 }
