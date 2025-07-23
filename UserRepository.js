@@ -62,6 +62,17 @@ export class UserRepository {
     return User.find().map(extractPublicUser);
   }
 
+  // Get a random test user
+  static async findRandomTestUser () {
+    const testUsers = User.find({ username: { $regex: '^test-' } });
+    if (testUsers.length === 0) {
+      throw new Error('No test users found');
+    }
+    const randomIndex = Math.floor(Math.random() * testUsers.length);
+    const randomTestUser = testUsers[randomIndex];
+    return extractPublicUser(randomTestUser);
+  }
+
   // Delete a user
   static async delete ({ username }) {
     const user = User.findOne({ username });

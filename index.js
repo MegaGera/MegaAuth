@@ -99,27 +99,59 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.post('/login/test', async (req, res) => {
+  try {
+    const user = await UserRepository.findRandomTestUser();
+    const token = jwt.sign(
+      extractJwtPayload(user),
+      process.env.SECRET_JWT_KEY,
+      { expiresIn: '1h' });
+    return res
+      .cookie(
+        'access_token',
+        token,
+        {
+          httpOnly: true,
+          domain: process.env.NODE_ENV === 'production' ? '.megagera.com' : '',
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 1000 * 60 * 60
+        })
+      .send({ user, token });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
 app.get('/register', (req, res) => {
   res.render('register');
 });
 
 app.post('/register', (req, res) => {
   const { username, password, email } = req.body;
-  if (!email || email.trim() === '') {
-    // Only admins can register users without email
+
+  // Check if username and password are provided
+  if (!username || username.trim() === '' || !password || password.trim() === '') {
+    return res.status(400).json({ error: 'Username and password are required' });
+  }
+
+  // Check if admin-only registration is needed (test users or users without email)
+  if ((username && username.startsWith('test-')) || (!email || email.trim() === '')) {
     return validateAdmin(req, res, async () => {
       try {
-        const id = await UserRepository.create({ username, password, email: undefined });
+        const id = await UserRepository.create({ username, password, email: email || undefined });
         return res.send({ id });
       } catch (error) {
         return res.status(400).json({ error: error.message });
       }
     });
   }
+
   // Public registration (email required)
   if (!email || email.trim() === '') {
     return res.status(400).json({ error: 'Email is required' });
   }
+
   UserRepository.create({ username, password, email })
     .then(id => res.send({ id }))
     .catch(error => res.status(400).json({ error: error.message }));

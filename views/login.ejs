@@ -21,8 +21,13 @@
         <input type="password" id="login-password" name="password" required>
         <br>
         <button type="submit">Login</button>
-        <span id="login-span">&nbsp;</span>
       </form>
+      
+      <div class="test-login-section">
+        <hr>
+        <button type="button" id="test-login-btn" class="test-login-btn">Try the app login with a test user</button>
+        <span id="test-login-span">&nbsp;</span>
+      </div>
       <p>Don't have an account? <a href="/register">Register here</a></p>
     </div>
   </div>
@@ -31,7 +36,8 @@
     const $ = el => document.querySelector(el);
 
     const loginForm = $('#login-form');
-    const loginSpan = $('#login-span');
+    const testLoginBtn = $('#test-login-btn');
+    const testLoginSpan = $('#test-login-span');
 
     const urlParams = new URLSearchParams(window.location.search);
     const redirectParam = urlParams.get('redirect');
@@ -49,16 +55,42 @@
         body: JSON.stringify({ username, password })
       }).then(res => {
         if (res.ok) {
-          loginSpan.innerText = 'Login successful';
-          loginSpan.style.color = 'green';
+          testLoginSpan.innerText = 'Login successful';
+          testLoginSpan.style.color = 'green';
           if (redirectParam) {
             window.location.href = redirectParam;
           } else {
             window.location.href = '/';
           }
         } else {
-          loginSpan.innerText = 'Login failed';
-          loginSpan.style.color = 'red';
+          testLoginSpan.innerText = 'Login failed';
+          testLoginSpan.style.color = 'red';
+        }
+      });
+    });
+
+    testLoginBtn?.addEventListener('click', async e => {
+      e.preventDefault();
+      testLoginSpan.innerText = 'Logging in as test user...';
+      testLoginSpan.style.color = '#666';
+
+      fetch('/login/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => {
+        if (res.ok) {
+          testLoginSpan.innerText = 'Test login successful';
+          testLoginSpan.style.color = 'green';
+          if (redirectParam) {
+            window.location.href = redirectParam;
+          } else {
+            window.location.href = '/';
+          }
+        } else {
+          testLoginSpan.innerText = 'Test login failed';
+          testLoginSpan.style.color = 'red';
         }
       });
     });
