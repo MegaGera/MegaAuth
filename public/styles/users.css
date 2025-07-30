@@ -207,9 +207,18 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.table-scroll-container {
+  overflow: auto;
+  max-height: 70vh;
+  padding-right: 10px;
+  width: 100%;
+}
+
 .users-table {
   width: 100%;
+  min-width: 1200px;
   border-collapse: collapse;
+  white-space: nowrap;
 }
 
 .users-table th {
@@ -224,10 +233,13 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Column width definitions removed for flexible layout */
+
 .users-table td {
   padding: 1.5rem 1rem;
   border-bottom: 1px solid #ddd;
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 .users-table tr:hover {
@@ -528,17 +540,23 @@ body {
     text-align: center;
   }
   
-  .permissions-grid {
-    grid-template-columns: 1fr;
+  .table-scroll-container {
+    max-height: 60vh;
+    overflow: auto;
   }
   
   .users-table {
     font-size: 0.8rem;
+    min-width: 1200px;
   }
   
   .users-table th,
   .users-table td {
     padding: 1rem 0.5rem;
+  }
+  
+  .permissions-grid {
+    grid-template-columns: 1fr;
   }
   
   .action-buttons {
@@ -564,6 +582,21 @@ body {
   
   .table-container {
     padding: 0 1rem 1rem;
+  }
+  
+  .table-scroll-container {
+    max-height: 50vh;
+    overflow: auto;
+  }
+  
+  .users-table {
+    min-width: 1200px;
+    font-size: 0.75rem;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 0.75rem 0.5rem;
   }
   
   .modal-content {

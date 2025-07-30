@@ -56,73 +56,75 @@
       </div>
       
       <div class="table-wrapper">
-        <table class="users-table">
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Permissions</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="users-tbody">
-            <% users.forEach(user => { %>
-              <tr class="user-row" data-username="<%= user.username %>" data-email="<%= user.email || '' %>">
-                <td class="username-cell">
-                  <div class="user-info">
-                    <div class="user-avatar">
-                      <i class="fas fa-user"></i>
-                    </div>
-                    <span><%= user.username %></span>
-                  </div>
-                </td>
-                <td class="email-cell"><%= user.email || '-' %></td>
-                <td class="permissions-cell">
-                  <div class="permissions-grid">
-                    <label class="permission-toggle">
-                      <input type="checkbox" class="permission-checkbox" 
-                             data-userid="<%= user.username %>" 
-                             data-permissions="megagoal"
-                             <%= user.permissions && user.permissions.some(p => p.name === 'megagoal') ? 'checked' : '' %>>
-                      <span class="toggle-label">MegaGoal</span>
-                    </label>
-                    <label class="permission-toggle">
-                      <input type="checkbox" class="permission-checkbox" 
-                             data-userid="<%= user.username %>" 
-                             data-permissions="megadocu"
-                             <%= user.permissions && user.permissions.some(p => p.name === 'megadocu') ? 'checked' : '' %>>
-                      <span class="toggle-label">MegaDocu</span>
-                    </label>
-                    <label class="permission-toggle">
-                      <input type="checkbox" class="permission-checkbox" 
-                             data-userid="<%= user.username %>" 
-                             data-permissions="megamedia"
-                             <%= user.permissions && user.permissions.some(p => p.name === 'megamedia') ? 'checked' : '' %>>
-                      <span class="toggle-label">MegaMedia</span>
-                    </label>
-                    <label class="permission-toggle">
-                      <input type="checkbox" class="permission-checkbox" 
-                             data-userid="<%= user.username %>" 
-                             data-permissions="admin"
-                             <%= user.permissions && user.permissions.some(p => p.type === 'admin') ? 'checked' : '' %>>
-                      <span class="toggle-label">Admin</span>
-                    </label>
-                  </div>
-                </td>
-                <td class="actions-cell">
-                  <div class="action-buttons">
-                    <button class="action-btn reset-btn" data-userid="<%= user.username %>" title="Reset Password">
-                      <i class="fas fa-key"></i>
-                    </button>
-                    <button class="action-btn delete-btn" data-userid="<%= user.username %>" title="Delete User">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </td>
+        <div class="table-scroll-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Permissions</th>
+                <th>Actions</th>
               </tr>
-            <% }); %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody id="users-tbody">
+              <% users.forEach(user => { %>
+                <tr class="user-row" data-username="<%= user.username %>" data-email="<%= user.email || '' %>">
+                  <td class="username-cell">
+                    <div class="user-info">
+                      <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                      </div>
+                      <span><%= user.username %></span>
+                    </div>
+                  </td>
+                  <td class="email-cell"><%= user.email || '-' %></td>
+                  <td class="permissions-cell">
+                    <div class="permissions-grid">
+                      <label class="permission-toggle">
+                        <input type="checkbox" class="permission-checkbox" 
+                               data-userid="<%= user.username %>" 
+                               data-permissions="megagoal"
+                               <%= user.permissions && user.permissions.some(p => p.name === 'megagoal') ? 'checked' : '' %>>
+                        <span class="toggle-label">MegaGoal</span>
+                      </label>
+                      <label class="permission-toggle">
+                        <input type="checkbox" class="permission-checkbox" 
+                               data-userid="<%= user.username %>" 
+                               data-permissions="megadocu"
+                               <%= user.permissions && user.permissions.some(p => p.name === 'megadocu') ? 'checked' : '' %>>
+                        <span class="toggle-label">MegaDocu</span>
+                      </label>
+                      <label class="permission-toggle">
+                        <input type="checkbox" class="permission-checkbox" 
+                               data-userid="<%= user.username %>" 
+                               data-permissions="megamedia"
+                               <%= user.permissions && user.permissions.some(p => p.name === 'megamedia') ? 'checked' : '' %>>
+                        <span class="toggle-label">MegaMedia</span>
+                      </label>
+                      <label class="permission-toggle">
+                        <input type="checkbox" class="permission-checkbox" 
+                               data-userid="<%= user.username %>" 
+                               data-permissions="admin"
+                               <%= user.permissions && user.permissions.some(p => p.type === 'admin') ? 'checked' : '' %>>
+                        <span class="toggle-label">Admin</span>
+                      </label>
+                    </div>
+                  </td>
+                  <td class="actions-cell">
+                    <div class="action-buttons">
+                      <button class="action-btn reset-btn" data-userid="<%= user.username %>" title="Reset Password">
+                        <i class="fas fa-key"></i>
+                      </button>
+                      <button class="action-btn delete-btn" data-userid="<%= user.username %>" title="Delete User">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
