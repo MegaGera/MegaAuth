@@ -11,15 +11,15 @@ const User = Schema('User', USER_SCHEMA);
 // UserRepository class
 export class UserRepository {
   // Create a new user
-  static async create ({ username, password, email }) {
+  static async create ({ username, password, email, test = false }) {
     Validation.username(username);
     Validation.password(password);
-    if (email) Validation.email(email);
+    if (email && email.trim() !== '') Validation.email(email);
 
     const user = User.findOne({ username });
     if (user) throw new Error('User already exists');
 
-    if (email) {
+    if (email && email.trim() !== '') {
       const emailUser = User.findOne({ email });
       if (emailUser) throw new Error('Email already in use');
     }
@@ -31,8 +31,9 @@ export class UserRepository {
       _id: id,
       username,
       password: hashedPassword,
-      email: email || null,
-      permissions: [Permission.generateMegaGoal()]
+      email: email && email.trim() !== '' ? email : '',
+      permissions: [Permission.generateMegaGoal()],
+      test: test
     }).save();
 
     return id;
@@ -64,7 +65,7 @@ export class UserRepository {
 
   // Get a random test user
   static async findRandomTestUser () {
-    const testUsers = User.find({ username: { $regex: '^test-' } });
+    const testUsers = User.find({ test: true });
     if (testUsers.length === 0) {
       throw new Error('No test users found');
     }

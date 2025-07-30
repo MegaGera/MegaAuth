@@ -65,7 +65,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.get('/users', validateJWT, async (req, res) => {
+app.get('/users', validateAdmin, async (req, res) => {
   try {
     const users = await UserRepository.findAll();
     return res.render('users', { users });
@@ -135,11 +135,11 @@ app.post('/register', (req, res) => {
     return res.status(400).json({ error: 'Username and password are required' });
   }
 
-  // Check if admin-only registration is needed (test users or users without email)
-  if ((username && username.startsWith('test-')) || (!email || email.trim() === '')) {
+  // Only admins can register users without email
+  if (!email || email.trim() === '') {
     return validateAdmin(req, res, async () => {
       try {
-        const id = await UserRepository.create({ username, password, email: email || undefined });
+        const id = await UserRepository.create({ username, password, email: undefined });
         return res.send({ id });
       } catch (error) {
         return res.status(400).json({ error: error.message });
@@ -155,6 +155,23 @@ app.post('/register', (req, res) => {
   UserRepository.create({ username, password, email })
     .then(id => res.send({ id }))
     .catch(error => res.status(400).json({ error: error.message }));
+});
+
+app.post('/create-test-user', validateAdmin, async (req, res) => {
+  try {
+    const testUsername = `test-user-${Date.now()}`;
+    const testPassword = `test-${Date.now()}`;
+    const id = await UserRepository.create({
+      username: testUsername,
+      password: testPassword,
+      email: '',
+      test: true
+    });
+    return res.send({ id, username: testUsername, password: testPassword });
+  } catch (error) {
+    console.error('Create test user error:', error);
+    return res.status(400).json({ error: error.message });
+  }
 });
 
 app.post('/delete', validateAdmin, async (req, res) => {

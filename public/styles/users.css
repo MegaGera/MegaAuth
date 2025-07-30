@@ -180,6 +180,31 @@ body {
   font-weight: 600;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.add-test-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 12px;
+  background-color: #17a2b8;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  font-size: 16px;
+}
+
+.add-test-user-btn:hover {
+  background-color: #138496;
+}
+
 .add-user-btn {
   display: flex;
   align-items: center;
@@ -244,6 +269,29 @@ body {
 
 .users-table tr:hover {
   background: rgba(217, 83, 79, 0.05);
+}
+
+/* Test User Badges */
+.test-badge {
+  background-color: #17a2b8;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.regular-badge {
+  background-color: #6c757d;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* User Info Cell */

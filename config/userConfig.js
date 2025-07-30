@@ -4,14 +4,15 @@ export const USER_SCHEMA = {
   username: { type: String, required: true },
   password: { type: String, required: true },
   email: { type: String, required: false },
-  permissions: { type: Array }
+  permissions: { type: Array },
+  test: { type: Boolean, required: false }
 };
 
 // JWT Payload Configuration - Fields to include in JWT token
-export const JWT_PAYLOAD_FIELDS = ['id', 'username', 'email', 'permissions'];
+export const JWT_PAYLOAD_FIELDS = ['id', 'username', 'email', 'permissions', 'test'];
 
 // Public User Fields - Fields to return in API responses (excluding password)
-export const PUBLIC_USER_FIELDS = ['_id', 'username', 'email', 'permissions'];
+export const PUBLIC_USER_FIELDS = ['_id', 'username', 'email', 'permissions', 'test'];
 
 // Helper function to extract user data for JWT payload
 export const extractJwtPayload = (user) => {
@@ -19,7 +20,8 @@ export const extractJwtPayload = (user) => {
     id: user._id,
     username: user.username,
     email: user.email,
-    permissions: user.permissions
+    permissions: user.permissions,
+    test: user.test
   };
 };
 
@@ -27,4 +29,4 @@ export const extractJwtPayload = (user) => {
 export const extractPublicUser = (user) => {
   const { password: _, ...publicUser } = user;
   return publicUser;
-}; 
+};

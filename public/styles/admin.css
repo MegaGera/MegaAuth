@@ -455,3 +455,35 @@ body {
     margin: 1rem;
   }
 }
+
+/* Test User Styles */
+.test-user-notice {
+  background-color: #ffc107;
+  color: #856404;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 10px;
+}
+
+.test-user-warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  color: #856404;
+}
+
+.test-user-warning i {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #f39c12;
+}
+
+.test-user-warning p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}

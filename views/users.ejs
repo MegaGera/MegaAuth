@@ -50,9 +50,14 @@
     <div class="table-container">
       <div class="table-header">
         <h2>Users List</h2>
-        <button class="add-user-btn" onclick="showAddUserModal()">
-          <i class="fas fa-plus"></i> Add User
-        </button>
+        <div class="header-buttons">
+          <button class="add-test-user-btn" onclick="createTestUser()">
+            <i class="fas fa-flask"></i> Create Test User
+          </button>
+          <button class="add-user-btn" onclick="showAddUserModal()">
+            <i class="fas fa-plus"></i> Add User
+          </button>
+        </div>
       </div>
       
       <div class="table-wrapper">
@@ -64,6 +69,7 @@
                 <th>Email</th>
                 <th>Permissions</th>
                 <th>Actions</th>
+                <th>Test User</th>
               </tr>
             </thead>
             <tbody id="users-tbody">
@@ -119,6 +125,13 @@
                         <i class="fas fa-trash"></i>
                       </button>
                     </div>
+                  </td>
+                  <td class="test-cell">
+                    <% if (user.test) { %>
+                      <span class="test-badge">Test User</span>
+                    <% } else { %>
+                      <span class="regular-badge">Regular User</span>
+                    <% } %>
                   </td>
                 </tr>
               <% }); %>
@@ -225,6 +238,38 @@
       $('#add-user-modal').style.display = 'none';
       $('#add-user-form').reset();
       $('#add-user-message').textContent = '';
+    }
+
+    // Create test user functionality
+    async function createTestUser() {
+      if (!confirm('Are you sure you want to create a test user?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/create-test-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          alert(`Test user created successfully!\nUsername: ${data.username}\nPassword: ${data.password}`);
+          window.location.reload();
+        } else {
+          const errorData = await response.json();
+          if (response.status === 403) {
+            alert('Access denied. Only administrators can create test users.');
+          } else {
+            alert(`Failed to create test user: ${errorData.error || 'Unknown error'}`);
+          }
+        }
+      } catch (error) {
+        console.error('Create test user failed:', error);
+        alert('An error occurred while creating test user');
+      }
     }
 
     // Add user form
