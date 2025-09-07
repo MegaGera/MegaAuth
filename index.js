@@ -228,7 +228,7 @@ app.get('/validate', validateJWT, (req, res) => {
 });
 
 app.get('/validate/admin', validateAdmin, (req, res) => {
-  return res.status(200).json({ message: 'Validated as Admin' });
+  return res.status(200).json({ message: 'Validated as Admin', data: req.body.data });
 });
 
 app.get('/validate/megagoal', validateJWT, (req, res) => {
