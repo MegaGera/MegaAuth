@@ -6,8 +6,19 @@ import cors from 'cors';
 
 import { UserRepository } from './UserRepository.js';
 import { extractJwtPayload } from './config/userConfig.js';
+import { connectRabbitMQ } from './config/rabbitmq.js';
+import {
+  logUserLogin,
+  logUserRegister,
+  logTestUserCreated,
+  logPasswordChange,
+  logPasswordReset
+} from './services/authLogger.js';
 
 const app = express();
+
+// Connect to RabbitMQ for logging
+connectRabbitMQ();
 
 app.set('view engine', 'ejs');
 
@@ -82,6 +93,10 @@ app.post('/login', async (req, res) => {
       extractJwtPayload(user),
       process.env.SECRET_JWT_KEY,
       { expiresIn: '1h' });
+
+    // Log the login action
+    await logUserLogin(username, 'normal', req);
+
     return res
       .cookie(
         'access_token',
@@ -106,6 +121,10 @@ app.post('/login/test', async (req, res) => {
       extractJwtPayload(user),
       process.env.SECRET_JWT_KEY,
       { expiresIn: '1h' });
+
+    // Log the test login action
+    await logUserLogin(user.username, 'test', req);
+
     return res
       .cookie(
         'access_token',
@@ -140,6 +159,10 @@ app.post('/register', (req, res) => {
     return validateAdmin(req, res, async () => {
       try {
         const id = await UserRepository.create({ username, password, email: undefined });
+
+        // Log admin-created user registration
+        await logUserRegister(username, req);
+
         return res.send({ id });
       } catch (error) {
         return res.status(400).json({ error: error.message });
@@ -153,7 +176,11 @@ app.post('/register', (req, res) => {
   }
 
   UserRepository.create({ username, password, email })
-    .then(id => res.send({ id }))
+    .then(async (id) => {
+      // Log public user registration
+      await logUserRegister(username, req);
+      res.send({ id });
+    })
     .catch(error => res.status(400).json({ error: error.message }));
 });
 
@@ -167,6 +194,10 @@ app.post('/create-test-user', validateAdmin, async (req, res) => {
       email: '',
       test: true
     });
+
+    // Log test user creation (admin action)
+    await logTestUserCreated(req.body.data.username, testUsername, req);
+
     return res.send({ id, username: testUsername, password: testPassword });
   } catch (error) {
     console.error('Create test user error:', error);
@@ -200,6 +231,9 @@ app.post('/change-password', validateJWT, async (req, res) => {
   const { username } = req.body.data;
   try {
     const id = await UserRepository.changePassword({ username, oldPassword, newPassword });
+
+    await logPasswordChange(username, req);
+
     return res.send({ id });
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -210,6 +244,9 @@ app.post('/reset-password', validateAdmin, async (req, res) => {
   const { username } = req.body;
   try {
     const id = await UserRepository.resetPassword({ username });
+
+    await logPasswordReset(req.body.data.username, username, req);
+
     return res.send({ id });
   } catch (error) {
     return res.status(400).json({ error: error.message });
