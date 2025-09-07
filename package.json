@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start:dev": "NODE_ENV=development node --watch index.js",
-    "start:prod": "NODE_ENV=production node --watch index.js",
+    "start:prod": "NODE_ENV=production node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "megagera",
