@@ -10,7 +10,7 @@ const logUserAction = async (username, action, details = {}, metadata = {}) => {
 
     const channel = getChannel();
     const logMessage = {
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
       service: 'megaauth',
       username,
       action,
