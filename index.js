@@ -3,6 +3,9 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import session from 'express-session';
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
 import { UserRepository } from './UserRepository.js';
 import { extractJwtPayload } from './config/userConfig.js';
@@ -25,6 +28,60 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
+
+// Configure session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-session-secret',
+  resave: false,
+  saveUninitialized: true, // Changed to true to save sessions even if not modified
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 1000 * 60 * 60 // 1 hour
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configure Google OAuth Strategy
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: '/auth/google/callback'
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const { id, emails } = profile;
+    const email = emails[0].value;
+
+    // Create or find user with needsUsername flag
+    const user = await UserRepository.createOrFindGoogleUser({
+      googleId: id,
+      email,
+      name: email.split('@')[0], // Use email prefix as name
+      needsUsername: true // Always require username selection for new users
+    });
+
+    return done(null, user);
+  } catch (error) {
+    return done(error, null);
+  }
+}));
+
+// Serialize user for session
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
+
+// Deserialize user from session
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await UserRepository.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
 
 // Add CORS middleware to allow all subdomains and the root domain of megagera.com only in production
 if (process.env.NODE_ENV === 'production') {
@@ -289,6 +346,132 @@ app.get('/validate/megamedia', validateJWT, (req, res) => {
     return res.status(200).json({ message: 'Validated' });
   } else {
     return res.status(401).json({ error: 'Unauthorized' });
+  }
+});
+
+// Google OAuth Routes
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['email'] })
+);
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  async (req, res) => {
+    try {
+      const user = req.user;
+
+      // Check if user needs to set username
+      if (user.needsUsername || user.username.startsWith('temp_')) {
+        // Store user in session and redirect to username selection
+        req.session.googleUser = user;
+        req.session.save((err) => {
+          if (err) {
+            console.error('Session save error:', err);
+            return res.redirect('/login?error=session_failed');
+          }
+          res.redirect('/username-selection');
+        });
+        return;
+      }
+
+      // User already has username, proceed with login
+      const token = jwt.sign(
+        extractJwtPayload(user),
+        process.env.SECRET_JWT_KEY,
+        { expiresIn: '1h' }
+      );
+
+      await logUserLogin(user.username, 'google', req);
+
+      res
+        .cookie(
+          'access_token',
+          token,
+          {
+            httpOnly: true,
+            domain: process.env.NODE_ENV === 'production' ? '.megagera.com' : '',
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 1000 * 60 * 60
+          }
+        )
+        .redirect('/');
+    } catch (error) {
+      console.error('Google OAuth callback error:', error);
+      res.redirect('/login?error=oauth_failed');
+    }
+  }
+);
+
+// Username selection page
+app.get('/username-selection', (req, res) => {
+  if (!req.session.googleUser) {
+    return res.redirect('/login');
+  }
+  res.render('username-selection');
+});
+
+// Check username availability
+app.post('/auth/google/check-username', async (req, res) => {
+  const { username } = req.body;
+  try {
+    const isAvailable = await UserRepository.checkUsernameAvailability({ username });
+    res.json({ available: isAvailable });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Complete username setup
+app.post('/auth/google/complete', async (req, res) => {
+  const { username } = req.body;
+
+  console.log('Session data:', req.session);
+  console.log('Google user in session:', req.session.googleUser);
+
+  if (!req.session.googleUser) {
+    console.error('No Google user session found');
+    return res.status(400).json({ error: 'No Google user session found' });
+  }
+
+  try {
+    const user = await UserRepository.completeGoogleUserSetup({
+      googleId: req.session.googleUser.googleId,
+      username
+    });
+
+    const token = jwt.sign(
+      extractJwtPayload(user),
+      process.env.SECRET_JWT_KEY,
+      { expiresIn: '1h' }
+    );
+
+    await logUserLogin(user.username, 'google', req);
+
+    // Clear the session
+    req.session.googleUser = null;
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session clear error:', err);
+      }
+    });
+
+    res
+      .cookie(
+        'access_token',
+        token,
+        {
+          httpOnly: true,
+          domain: process.env.NODE_ENV === 'production' ? '.megagera.com' : '',
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 1000 * 60 * 60
+        }
+      )
+      .json({ success: true, user });
+  } catch (error) {
+    console.error('Username completion error:', error);
+    res.status(400).json({ error: error.message });
   }
 });
 

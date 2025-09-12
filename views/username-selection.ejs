@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose Username - MegaAuth</title>
+  <link rel="stylesheet" href="/styles/login.css">
+  <style>
+    .username-form {
+      margin-top: 20px;
+    }
+    .username-input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    .username-error {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .username-success {
+      color: green;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-container">
+      <img src="https://server.megamedia.megagera.com/megagera/MG_logo_lt.png">
+      <hr>
+      <h2>Choose Your Username</h2>
+      <p>Welcome! Please choose a username to complete your account setup.</p>
+      
+      <form id="username-form" class="username-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" class="username-input" required>
+        <div id="username-message" class="username-error" style="display: none;"></div>
+        <br>
+        <button type="submit">Complete Setup</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const $ = el => document.querySelector(el);
+    const usernameForm = $('#username-form');
+    const usernameInput = $('#username');
+    const usernameMessage = $('#username-message');
+
+    usernameForm?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const username = usernameInput.value.trim();
+      
+      if (!username) {
+        showMessage('Username is required', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch('/auth/google/complete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          showMessage('Username set successfully! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1000);
+        } else {
+          showMessage(result.error || 'Username already exists', 'error');
+        }
+      } catch (error) {
+        showMessage('An error occurred. Please try again.', 'error');
+      }
+    });
+
+    function showMessage(message, type) {
+      usernameMessage.textContent = message;
+      usernameMessage.className = `username-${type}`;
+      usernameMessage.style.display = 'block';
+    }
+
+    // Real-time username validation
+    let validationTimeout;
+    usernameInput?.addEventListener('input', () => {
+      clearTimeout(validationTimeout);
+      const username = usernameInput.value.trim();
+      
+      if (username.length < 3) {
+        showMessage('Username must be at least 3 characters', 'error');
+        return;
+      }
+
+      validationTimeout = setTimeout(async () => {
+        try {
+          const response = await fetch('/auth/google/check-username', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+          });
+
+          const result = await response.json();
+          
+          if (response.ok) {
+            showMessage('Username is available!', 'success');
+          } else {
+            showMessage('Username already exists', 'error');
+          }
+        } catch (error) {
+          // Don't show error for network issues during typing
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>

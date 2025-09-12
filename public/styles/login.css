@@ -135,6 +135,37 @@ button:hover {
   background-color: #0056b3;
 }
 
+/* Google Login Button */
+.google-login-btn {
+  background-color: #ffffff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  padding: 12px 24px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.google-login-btn:hover {
+  text-decoration: none !important;
+  background-color: #f3f3f3;
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
 /* Link styling */
 .form-container p {
   margin-top: 20px;
