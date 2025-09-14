@@ -23,6 +23,9 @@ const app = express();
 // Connect to RabbitMQ for logging
 connectRabbitMQ();
 
+// Simple in-memory store for Google user data during username selection
+const googleUserStore = new Map();
+
 app.set('view engine', 'ejs');
 
 app.use(express.static('public'));
@@ -32,12 +35,15 @@ app.use(cookieParser());
 // Configure session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-session-secret',
-  resave: false,
-  saveUninitialized: true, // Changed to true to save sessions even if not modified
+  resave: true, // Changed to true to ensure session is saved
+  saveUninitialized: true,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 1000 * 60 * 60 // 1 hour
-  }
+    maxAge: 1000 * 60 * 60, // 1 hour
+    httpOnly: true,
+    sameSite: 'lax' // Changed from 'strict' to 'lax' for better compatibility
+  },
+  name: 'connect.sid' // Explicit session name
 }));
 
 // Initialize Passport
@@ -54,16 +60,17 @@ passport.use(new GoogleStrategy({
     const { id, emails } = profile;
     const email = emails[0].value;
 
-    // Create or find user with needsUsername flag
+    // Create or find user
     const user = await UserRepository.createOrFindGoogleUser({
       googleId: id,
       email,
       name: email.split('@')[0], // Use email prefix as name
-      needsUsername: true // Always require username selection for new users
+      needsUsername: false // Let the method determine if username is needed
     });
 
     return done(null, user);
   } catch (error) {
+    console.error('Google OAuth Strategy error:', error);
     return done(error, null);
   }
 }));
@@ -77,9 +84,17 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await UserRepository.findById(id);
+
+    // If user doesn't exist (was deleted), return null instead of error
+    if (!user) {
+      return done(null, false);
+    }
+
     done(null, user);
   } catch (error) {
-    done(error, null);
+    console.error('Deserialize user error:', error);
+    // Return null instead of error to prevent session issues
+    done(null, false);
   }
 });
 
@@ -123,7 +138,11 @@ const validateAdmin = (req, res, next) => {
 
 app.get('/', async (req, res) => {
   const token = req.cookies.access_token;
-  if (!token) return res.render('login');
+
+  if (!token) {
+    return res.render('login');
+  }
+
   try {
     const data = jwt.verify(token, process.env.SECRET_JWT_KEY);
     const users = await UserRepository.findAll();
@@ -268,6 +287,8 @@ app.post('/delete', validateAdmin, async (req, res) => {
     const id = await UserRepository.delete({ username });
     return res.send({ id });
   } catch (error) {
+    console.error('Delete user error:', error);
+    console.error('Error stack:', error.stack);
     return res.status(400).json({ error: error.message });
   }
 });
@@ -311,12 +332,40 @@ app.post('/reset-password', validateAdmin, async (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  return res
-    .clearCookie('access_token'
-      , { domain: process.env.NODE_ENV === 'production' ? '.megagera.com' : '' }
-    )
-    .json({ message: 'Logged out' });
+  // Clear Passport user data manually (avoid req.logout() to prevent session errors)
+  if (req.session) {
+    // Clear passport data from session
+    if (req.session.passport) {
+      delete req.session.passport;
+    }
+
+    // Destroy the session
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Session destroy error:', err);
+      }
+    });
+  }
+
+  // Clear JWT token cookie (this is the main logout for regular users)
+  res.clearCookie('access_token', {
+    domain: process.env.NODE_ENV === 'production' ? '.megagera.com' : '',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  });
+
+  // Clear session cookie
+  res.clearCookie('connect.sid', {
+    domain: process.env.NODE_ENV === 'production' ? '.megagera.com' : '',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  });
+
+  return res.json({ message: 'Logged out' });
 });
+
 app.get('/validate', validateJWT, (req, res) => {
   return res.status(200).json({ message: 'Validated', data: req.body.data });
 });
@@ -361,16 +410,13 @@ app.get('/auth/google/callback',
       const user = req.user;
 
       // Check if user needs to set username
+
       if (user.needsUsername || user.username.startsWith('temp_')) {
-        // Store user in session and redirect to username selection
-        req.session.googleUser = user;
-        req.session.save((err) => {
-          if (err) {
-            console.error('Session save error:', err);
-            return res.redirect('/login?error=session_failed');
-          }
-          res.redirect('/username-selection');
-        });
+        // Store user in memory store and redirect to username selection
+        const storeKey = req.sessionID;
+        googleUserStore.set(storeKey, user);
+
+        res.redirect('/username-selection');
         return;
       }
 
@@ -382,6 +428,41 @@ app.get('/auth/google/callback',
       );
 
       await logUserLogin(user.username, 'google', req);
+
+      // Set the JWT cookie first, then redirect to completion page
+      const userData = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        displayName: user.displayName
+      };
+
+      const redirectUrl = req.query.redirect || '/';
+
+      // Create a completion page that will handle the JSON response
+      const completionHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Completing Google Login...</title>
+        </head>
+        <body>
+          <p>Completing Google login...</p>
+          <script>
+            // Simulate the JSON response that would be sent
+            const responseData = {
+              success: true,
+              redirectUrl: '${redirectUrl}',
+              user: ${JSON.stringify(userData)},
+              token: '${token}'
+            };
+            
+            // Redirect to the specified URL
+            window.location.href = responseData.redirectUrl;
+          </script>
+        </body>
+        </html>
+      `;
 
       res
         .cookie(
@@ -395,7 +476,15 @@ app.get('/auth/google/callback',
             maxAge: 1000 * 60 * 60
           }
         )
-        .redirect('/');
+        .send(completionHtml);
+      // Clear the Passport session after setting the cookie
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.error('Error destroying session:', err);
+          }
+        });
+      }
     } catch (error) {
       console.error('Google OAuth callback error:', error);
       res.redirect('/login?error=oauth_failed');
@@ -405,77 +494,152 @@ app.get('/auth/google/callback',
 
 // Username selection page
 app.get('/username-selection', (req, res) => {
-  if (!req.session.googleUser) {
+  // Check if user is in memory store
+  const storeKey = req.sessionID;
+  const googleUser = googleUserStore.get(storeKey);
+
+  if (!googleUser) {
     return res.redirect('/login');
   }
+
+  // Check if user needs username selection
+
+  if (!googleUser.needsUsername && !googleUser.username.startsWith('temp_')) {
+    return res.redirect('/');
+  }
+
   res.render('username-selection');
 });
 
 // Check username availability
 app.post('/auth/google/check-username', async (req, res) => {
-  const { username } = req.body;
   try {
+    const { username } = req.body;
+
     const isAvailable = await UserRepository.checkUsernameAvailability({ username });
+
     res.json({ available: isAvailable });
   } catch (error) {
+    console.error('Username check error:', error);
+    console.error('Error stack:', error.stack);
     res.status(400).json({ error: error.message });
   }
 });
 
 // Complete username setup
 app.post('/auth/google/complete', async (req, res) => {
-  const { username } = req.body;
-
-  console.log('Session data:', req.session);
-  console.log('Google user in session:', req.session.googleUser);
-
-  if (!req.session.googleUser) {
-    console.error('No Google user session found');
-    return res.status(400).json({ error: 'No Google user session found' });
-  }
-
   try {
-    const user = await UserRepository.completeGoogleUserSetup({
-      googleId: req.session.googleUser.googleId,
-      username
-    });
+    const { username } = req.body;
 
-    const token = jwt.sign(
-      extractJwtPayload(user),
-      process.env.SECRET_JWT_KEY,
-      { expiresIn: '1h' }
-    );
+    // Check if user is in memory store
+    const storeKey = req.sessionID;
+    const googleUser = googleUserStore.get(storeKey);
 
-    await logUserLogin(user.username, 'google', req);
+    if (!googleUser) {
+      console.error('No Google user in memory store');
+      return res.status(400).json({ error: 'No Google user in memory store' });
+    }
 
-    // Clear the session
-    req.session.googleUser = null;
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session clear error:', err);
-      }
-    });
-
-    res
-      .cookie(
-        'access_token',
-        token,
-        {
-          httpOnly: true,
-          domain: process.env.NODE_ENV === 'production' ? '.megagera.com' : '',
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: 1000 * 60 * 60
-        }
-      )
-      .json({ success: true, user });
-  } catch (error) {
-    console.error('Username completion error:', error);
-    res.status(400).json({ error: error.message });
+    try {
+      const user = await UserRepository.completeGoogleUserSetup({
+        googleId: googleUser.googleId,
+        username
+      });
+      const token = jwt.sign(
+        extractJwtPayload(user),
+        process.env.SECRET_JWT_KEY,
+        { expiresIn: '1h' }
+      );
+      await logUserLogin(user.username, 'google', req);
+      googleUserStore.delete(storeKey);
+      res
+        .cookie(
+          'access_token',
+          token,
+          {
+            httpOnly: true,
+            domain: process.env.NODE_ENV === 'production' ? '.megagera.com' : '',
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 1000 * 60 * 60
+          }
+        )
+        .json({ success: true, user });
+    } catch (error) {
+      console.error('Username completion error:', error);
+      console.error('Error stack:', error.stack);
+      res.status(400).json({ error: error.message });
+    }
+  } catch (outerError) {
+    console.error('Outer error in /auth/google/complete:', outerError);
+    console.error('Outer error stack:', outerError.stack);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// Global error handler
+process.on('uncaughtException', (error) => {
+  console.error('=== UNCAUGHT EXCEPTION ===');
+  console.error('Error:', error);
+  console.error('Error stack:', error.stack);
+  console.error('Error name:', error.name);
+  console.error('Error message:', error.message);
+  console.error('========================');
+
+  // Don't exit on session-related errors, just log them
+  if (error.message && error.message.includes('regenerate')) {
+    console.error('Session error detected, continuing...');
+    return;
+  }
+
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('=== UNHANDLED REJECTION ===');
+  console.error('Promise:', promise);
+  console.error('Reason:', reason);
+  console.error('Reason stack:', reason.stack);
+  console.error('==========================');
+
+  // Don't exit on session-related errors, just log them
+  if (reason && reason.message && reason.message.includes('regenerate')) {
+    console.error('Session error detected, continuing...');
+    return;
+  }
+
+  process.exit(1);
+});
+
+// Add process monitoring and graceful shutdown
+let serverInstance = null;
+
+process.on('exit', (code) => {
+});
+
+process.on('SIGTERM', () => {
+  gracefulShutdown();
+});
+
+process.on('SIGINT', () => {
+  gracefulShutdown();
+});
+
+function gracefulShutdown () {
+  if (serverInstance) {
+    serverInstance.close(() => {
+      process.exit(0);
+    });
+
+    // Force exit after 5 seconds if server doesn't close
+    setTimeout(() => {
+      process.exit(1);
+    }, 5000);
+  } else {
+    process.exit(0);
+  }
+}
+
 const PORT = process.env.PORT || 3150;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+serverInstance = app.listen(PORT, () => {
 });

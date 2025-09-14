@@ -4,9 +4,11 @@ import bcrypt from 'bcrypt';
 import { USER_SCHEMA, extractPublicUser } from './config/userConfig.js';
 
 const { Schema } = new DBLocal({ path: './db' });
+console.log('DBLocal initialized successfully');
 
 // User schema
 const User = Schema('User', USER_SCHEMA);
+console.log('User schema created successfully');
 
 // UserRepository class
 export class UserRepository {
@@ -21,11 +23,11 @@ export class UserRepository {
 
     if (email && email.trim() !== '') Validation.email(email);
 
-    const user = User.findOne({ username });
+    const user = await User.findOne({ username });
     if (user) throw new Error('User already exists');
 
     if (email && email.trim() !== '') {
-      const emailUser = User.findOne({ email });
+      const emailUser = await User.findOne({ email });
       if (emailUser) throw new Error('Email already in use');
     }
 
@@ -40,7 +42,7 @@ export class UserRepository {
       email: email && email.trim() !== '' ? email : '',
       permissions: [Permission.generateMegaGoal()],
       test,
-      googleId,
+      googleId: googleId || '',
       provider,
       needsUsername
     }).save();
@@ -51,35 +53,35 @@ export class UserRepository {
   // Create or find Google OAuth user
   static async createOrFindGoogleUser ({ googleId, email, name, needsUsername = false }) {
     // First, try to find by Google ID
-    let user = User.findOne({ googleId });
+    let user = await User.findOne({ googleId });
 
     if (user) {
       return extractPublicUser(user);
     }
 
     // If not found by Google ID, try to find by email
-    user = User.findOne({ email });
+    user = await User.findOne({ email });
     if (user) {
       // Update existing user with Google ID
       user.googleId = googleId;
       user.provider = 'google';
-      user.save();
+      await user.save();
       return extractPublicUser(user);
     }
 
-    // Create new user
-    const username = needsUsername ? 'temp_' + Date.now() : (name.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now());
+    // Create new user - always require username selection for new Google users
+    const username = 'temp_' + Date.now();
     const id = await this.create({
       username,
       password: '', // Use empty string instead of null
       email,
       googleId,
       provider: 'google',
-      needsUsername
+      needsUsername: true // Always require username selection for new Google users
     });
 
     // Return the created user
-    user = User.findOne({ _id: id });
+    user = await User.findOne({ _id: id });
     return extractPublicUser(user);
   };
 
@@ -89,10 +91,10 @@ export class UserRepository {
     Validation.password(password);
 
     // Try to find user by username first, then by email
-    let user = User.findOne({ username });
+    let user = await User.findOne({ username });
     if (!user) {
       // If not found by username, try by email
-      user = User.findOne({ email: username });
+      user = await User.findOne({ email: username });
     }
     if (!user) throw new Error('User not found');
 
@@ -125,14 +127,18 @@ export class UserRepository {
 
   // Delete a user
   static async delete ({ username }) {
-    const user = User.findOne({ username });
-    if (!user) throw new Error('User not found');
-    user.remove();
+    const user = await User.findOne({ username });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Use the remove method on the user instance
+    await user.remove();
     return user._id;
   }
 
   static async updatePermissions ({ username, permissions, action }) {
-    const user = User.findOne({ username });
+    const user = await User.findOne({ username });
     if (!user) throw new Error('User not found');
     if (action) {
       const permission = Permission.generate(permissions);
@@ -157,7 +163,7 @@ export class UserRepository {
       }
       user.permissions = user.permissions.filter(p => p.name !== permissions);
     }
-    user.save();
+    await user.save();
     return user._id;
   }
 
@@ -166,7 +172,7 @@ export class UserRepository {
     Validation.username(username);
     Validation.password(newPassword);
 
-    const user = User.findOne({ username });
+    const user = await User.findOne({ username });
     if (!user) throw new Error('User not found');
 
     const isValid = await bcrypt.compare(oldPassword, user.password);
@@ -174,7 +180,7 @@ export class UserRepository {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    user.save();
+    await user.save();
 
     return user._id;
   }
@@ -183,13 +189,13 @@ export class UserRepository {
   static async resetPassword ({ username }) {
     Validation.username(username);
 
-    const user = User.findOne({ username });
+    const user = await User.findOne({ username });
     if (!user) throw new Error('User not found');
 
     const newPassword = username;
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    user.save();
+    await user.save();
 
     return user._id;
   }
@@ -199,36 +205,40 @@ export class UserRepository {
     Validation.username(username);
 
     // Check if username already exists
-    const existingUser = User.findOne({ username });
+    const existingUser = await User.findOne({ username });
     if (existingUser) {
+      console.log('Username already exists');
       throw new Error('Username already exists');
     }
 
     // Find the Google user by googleId
-    const user = User.findOne({ googleId });
+    const user = await User.findOne({ googleId });
     if (!user) {
+      console.log('Google user not found');
       throw new Error('Google user not found');
     }
-
     // Update user with chosen username
     user.username = username;
     user.needsUsername = false;
-    user.save();
 
-    return extractPublicUser(user);
+    await user.save();
+    console.log('User saved successfully');
+
+    const result = extractPublicUser(user);
+    return result;
   };
 
   // Check if username is available
   static async checkUsernameAvailability ({ username }) {
     Validation.username(username);
 
-    const existingUser = User.findOne({ username });
+    const existingUser = await User.findOne({ username });
     return !existingUser; // Return true if available, false if taken
   };
 
   // Find user by ID (for deserializeUser)
   static async findById (id) {
-    const user = User.findOne({ _id: id });
+    const user = await User.findOne({ _id: id });
     if (!user) throw new Error('User not found');
     return extractPublicUser(user);
   };

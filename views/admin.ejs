@@ -256,6 +256,7 @@
     logoutButton?.addEventListener('click', async e => {
       e.preventDefault();
       try {
+        // Use the same logout method for all users
         const response = await fetch('/logout', {
           method: 'POST',
           headers: {

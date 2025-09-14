@@ -102,8 +102,6 @@ button:hover {
 #login-span, #register-span, #test-login-span {
   display: block;
   margin-top: 10px;
-  font-size: 14px;
-  min-height: 20px;
 }
 
 /* Test login section */
