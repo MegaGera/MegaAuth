@@ -41,7 +41,7 @@ const logUserLogin = async (username, loginType, req) => {
     username,
     'USER_LOGIN',
     {
-      loginType // 'normal', 'test'
+      loginType // 'normal', 'test', 'google'
     },
     {
       ip: req.ip,
@@ -50,12 +50,12 @@ const logUserLogin = async (username, loginType, req) => {
   );
 };
 
-const logUserRegister = async (username, req) => {
+const logUserRegister = async (username, registerType, req) => {
   await logUserAction(
     username,
     'USER_REGISTER',
     {
-
+      registerType // 'normal', 'google'
     },
     {
       ip: req.ip,

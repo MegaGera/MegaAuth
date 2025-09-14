@@ -63,9 +63,7 @@ passport.use(new GoogleStrategy({
     // Create or find user
     const user = await UserRepository.createOrFindGoogleUser({
       googleId: id,
-      email,
-      name: email.split('@')[0], // Use email prefix as name
-      needsUsername: false // Let the method determine if username is needed
+      email
     });
 
     return done(null, user);
@@ -237,7 +235,7 @@ app.post('/register', (req, res) => {
         const id = await UserRepository.create({ username, password, email: undefined });
 
         // Log admin-created user registration
-        await logUserRegister(username, req);
+        await logUserRegister(username, 'normal', req);
 
         return res.send({ id });
       } catch (error) {
@@ -254,7 +252,7 @@ app.post('/register', (req, res) => {
   UserRepository.create({ username, password, email })
     .then(async (id) => {
       // Log public user registration
-      await logUserRegister(username, req);
+      await logUserRegister(username, 'normal', req);
       res.send({ id });
     })
     .catch(error => res.status(400).json({ error: error.message }));
@@ -550,7 +548,7 @@ app.post('/auth/google/complete', async (req, res) => {
         process.env.SECRET_JWT_KEY,
         { expiresIn: '1h' }
       );
-      await logUserLogin(user.username, 'google', req);
+      await logUserRegister(user.username, 'google', req);
       googleUserStore.delete(storeKey);
       res
         .cookie(

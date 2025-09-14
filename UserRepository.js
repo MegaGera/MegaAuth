@@ -51,7 +51,7 @@ export class UserRepository {
   };
 
   // Create or find Google OAuth user
-  static async createOrFindGoogleUser ({ googleId, email, name, needsUsername = false }) {
+  static async createOrFindGoogleUser ({ googleId, email }) {
     // First, try to find by Google ID
     let user = await User.findOne({ googleId });
 
