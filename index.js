@@ -20,6 +20,19 @@ import {
 
 const app = express();
 
+// Trust proxy for HTTPS in production
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+  // Force HTTPS redirect in production
+  app.use((req, res, next) => {
+    if (req.header('x-forwarded-proto') !== 'https') {
+      res.redirect(`https://${req.header('host')}${req.url}`);
+    } else {
+      next();
+    }
+  });
+}
+
 // Connect to RabbitMQ for logging
 connectRabbitMQ();
 
@@ -41,7 +54,7 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production',
     maxAge: 1000 * 60 * 60, // 1 hour
     httpOnly: true,
-    sameSite: 'lax' // Changed from 'strict' to 'lax' for better compatibility
+    sameSite: 'strict'
   },
   name: 'connect.sid' // Explicit session name
 }));
