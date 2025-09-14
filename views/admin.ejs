@@ -52,7 +52,7 @@
           </div>
 
           <!-- Change Password Card -->
-          <% if (!data.test) { %>
+          <% if (!data.test && data.provider !== 'google') { %>
             <div class="card password-card">
               <div class="card-header">
                 <i class="fas fa-key"></i>
