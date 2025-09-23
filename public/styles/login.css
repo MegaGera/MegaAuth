@@ -36,8 +36,7 @@ body {
 /* Logo styling */
 .form-container img {
   max-width: 100%; /* Responsive sizing */
-  max-height: 80px; /* Restrict height */
-  margin-bottom: 15px; /* Space below the logo */
+  max-height: 120px; /* Restrict height */
 }
 
 /* Separator styling */
