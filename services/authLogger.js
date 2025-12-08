@@ -50,7 +50,35 @@ const logUserLogin = async (username, loginType, req) => {
   );
 };
 
-const logUserRegister = async (username, req) => {
+// Send message to mailing queue
+const sendMailingMessage = async (email, username) => {
+  try {
+    if (!isConnected()) {
+      console.warn('RabbitMQ not connected, skipping mailing message');
+      return;
+    }
+
+    const channel = getChannel();
+    const mailingMessage = {
+      recipient: email,
+      template: 'register',
+      username
+    };
+
+    await channel.sendToQueue(
+      'mailing',
+      Buffer.from(JSON.stringify(mailingMessage)),
+      { persistent: true } // Make message persistent
+    );
+
+    console.log(`Mailing message sent: ${email} - register template`);
+  } catch (error) {
+    console.error('Failed to send mailing message:', error.message);
+    // Don't throw error to avoid breaking the main flow
+  }
+};
+
+const logUserRegister = async (username, req, email = null) => {
   await logUserAction(
     username,
     'USER_REGISTER',
@@ -62,6 +90,11 @@ const logUserRegister = async (username, req) => {
       userAgent: req.get('User-Agent')
     }
   );
+
+  // Send mailing message if email is provided
+  if (email) {
+    await sendMailingMessage(email, username);
+  }
 };
 
 const logTestUserCreated = async (adminUsername, testUsername, req) => {
@@ -113,5 +146,6 @@ export {
   logUserRegister,
   logTestUserCreated,
   logPasswordChange,
-  logPasswordReset
+  logPasswordReset,
+  sendMailingMessage
 };

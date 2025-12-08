@@ -161,7 +161,7 @@ app.post('/register', (req, res) => {
         const id = await UserRepository.create({ username, password, email: undefined });
 
         // Log admin-created user registration
-        await logUserRegister(username, req);
+        await logUserRegister(username, req, undefined);
 
         return res.send({ id });
       } catch (error) {
@@ -178,7 +178,7 @@ app.post('/register', (req, res) => {
   UserRepository.create({ username, password, email })
     .then(async (id) => {
       // Log public user registration
-      await logUserRegister(username, req);
+      await logUserRegister(username, req, email);
       res.send({ id });
     })
     .catch(error => res.status(400).json({ error: error.message }));
