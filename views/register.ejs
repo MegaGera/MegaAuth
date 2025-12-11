@@ -11,6 +11,15 @@
     <div class="form-container">
       <img src="https://server.megamedia.megagera.com/megagera/MG_logo_lt.png">
       <hr>
+      <div class="warning-banner">
+        <div class="warning-header" id="warning-header">
+          <span>⚠️ Server Error Notice</span>
+          <span class="warning-toggle" id="warning-toggle">▼</span>
+        </div>
+        <div class="warning-content" id="warning-content" style="display: none;">
+          <p>There was an error in the server and data from the last month has been lost. If you can't login, please register again with the same username to recover your matches viewed.</p>
+        </div>
+      </div>
       <form id="register-form">
         <label for="register-username">Username</label>
         <input type="text" id="register-username" name="username" required>
@@ -30,6 +39,16 @@
     const $ = el => document.querySelector(el);
     const registerForm = $('#register-form');
     const registerSpan = $('#register-span');
+    const warningHeader = $('#warning-header');
+    const warningContent = $('#warning-content');
+    const warningToggle = $('#warning-toggle');
+
+    // Toggle warning banner
+    warningHeader?.addEventListener('click', () => {
+      const isHidden = warningContent.style.display === 'none';
+      warningContent.style.display = isHidden ? 'block' : 'none';
+      warningToggle.textContent = isHidden ? '▲' : '▼';
+    });
     registerForm?.addEventListener('submit', async e => {
       e.preventDefault();
       const username = $('#register-username').value.trim();
