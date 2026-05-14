@@ -176,6 +176,8 @@ class Permission {
         return Permission.generateMegaGoal();
       case 'megamedia':
         return Permission.generateMegaMedia();
+      case 'otto':
+        return Permission.generateOtto();
       default:
         throw new Error('Invalid permission');
     }
@@ -196,5 +198,9 @@ class Permission {
 
   static generateMegaMedia () {
     return { type: 'access', name: 'megamedia', url: 'https://megamedia.megagera.com' };
+  }
+
+  static generateOtto () {
+    return { type: 'access', name: 'otto', url: 'https://otto.megagera.com' };
   }
 }

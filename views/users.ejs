@@ -40,6 +40,7 @@
             <option value="megagoal">MegaGoal</option>
             <option value="megadocu">MegaDocu</option>
             <option value="megamedia">MegaMedia</option>
+            <option value="otto">Otto</option>
             <option value="admin">Admin</option>
           </select>
         </div>
@@ -106,6 +107,13 @@
                                data-permissions="megamedia"
                                <%= user.permissions && user.permissions.some(p => p.name === 'megamedia') ? 'checked' : '' %>>
                         <span class="toggle-label">MegaMedia</span>
+                      </label>
+                      <label class="permission-toggle">
+                        <input type="checkbox" class="permission-checkbox" 
+                               data-userid="<%= user.username %>" 
+                               data-permissions="otto"
+                               <%= user.permissions && user.permissions.some(p => p.name === 'otto') ? 'checked' : '' %>>
+                        <span class="toggle-label">Otto</span>
                       </label>
                       <label class="permission-toggle">
                         <input type="checkbox" class="permission-checkbox" 
