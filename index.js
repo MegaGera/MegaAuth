@@ -300,6 +300,14 @@ app.get('/validate/otto', validateJWT, (req, res) => {
   }
 });
 
+app.get('/validate/onze', validateJWT, (req, res) => {
+  if (req.body.data.permissions.some(p => p.name === 'onze')) {
+    return res.status(200).json({ message: 'Validated', data: req.body.data });
+  } else {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+});
+
 const PORT = process.env.PORT || 3150;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
