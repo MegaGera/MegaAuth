@@ -26,13 +26,26 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
 
-// Add CORS middleware to allow all subdomains and the root domain of megagera.com only in production
+// CORS: production megagera.com subdomains; local dev localhost ports (Onze :4300, etc.)
 if (process.env.NODE_ENV === 'production') {
   app.use(cors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, false); // block non-browser requests
+      if (!origin) return callback(null, false);
       const megageraRegex = /^https:\/\/(.*\.)?megagera\.com$/;
       if (megageraRegex.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true
+  }));
+} else {
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const localOrigin = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+      if (localOrigin.test(origin)) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
