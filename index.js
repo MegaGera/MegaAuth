@@ -105,7 +105,7 @@ app.post('/login', async (req, res) => {
     const token = jwt.sign(
       extractJwtPayload(user),
       process.env.SECRET_JWT_KEY,
-      { expiresIn: '1h' });
+      { expiresIn: '800h' });
 
     // Log the login action
     await logUserLogin(username, 'normal', req);
@@ -119,7 +119,7 @@ app.post('/login', async (req, res) => {
           domain: process.env.NODE_ENV === 'production' ? '.megagera.com' : '',
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict',
-          maxAge: 1000 * 60 * 60
+          maxAge: 1000 * 60 * 60 * 800
         })
       .send({ user, token });
   } catch (error) {
